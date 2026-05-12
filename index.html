@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICT Doelenzoeker - Live</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        .filter-btn.active { background-color: #2563eb; color: white; border-color: #2563eb; }
+        .loading-spinner { border-top-color: #2563eb; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <header class="bg-white border-b sticky top-0 z-50 p-4 shadow-sm">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <h1 class="text-xl font-black text-slate-800 tracking-tight uppercase">ICT Leerplan <span class="text-blue-600">Dashboard</span></h1>
+            <div id="connection-status" class="text-[10px] font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-400 uppercase tracking-widest">Verbinding maken...</div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        
+        <!-- Error Box -->
+        <div id="error-display" class="hidden bg-amber-50 border-l-4 border-amber-400 p-4 mb-8 text-amber-800 shadow-sm rounded-r-xl">
+            <p class="font-bold">Beveiligingsmelding</p>
+            <p class="text-sm">Je browser blokkeert de verbinding vanaf je computer naar Google Sheets.</p>
+            <ul class="list-disc ml-5 mt-2 text-xs">
+                <li>Probeer dit bestand te openen met <strong>Firefox</strong>.</li>
+                <li>Of upload dit bestand naar een online plek (zoals Netlify, GitHub of SharePoint).</li>
+            </ul>
+        </div>
+
+        <!-- Filters -->
+        <div id="ui-content" class="hidden">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-8">
+                <div class="mb-6">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Leerjaar / Fase</label>
+                    <div id="grade-filters" class="flex flex-wrap gap-2">
+                        <button onclick="setGrade('all')" id="btn-all" class="filter-btn active px-4 py-2 rounded-xl border border-slate-200 text-sm font-bold transition hover:bg-slate-50">Alle</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="search-input" onkeyup="render()" placeholder="Zoek op trefwoord..." class="p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                    <select id="domain-filter" onchange="render()" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-medium appearance-none"></select>
+                </div>
+            </div>
+
+            <div id="stats" class="mb-6 text-xs font-black text-slate-400 uppercase tracking-widest"></div>
+            <div id="goals-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- Loader -->
+        <div id="loader" class="flex flex-col items-center justify-center py-32 text-center">
+            <div class="loading-spinner w-12 h-12 border-4 border-slate-200 rounded-full mb-6"></div>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-xs">Data live ophalen...</p>
+        </div>
+    </main>
+
+    <script>
+        // JOUW LIVE URL
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCFdDnFXhAe6lt-EzZ-VeHTg54dWNk-PuIDtYTN1hUd_yDxnhaUhdy1hQDx3QXjGtZIhmwUfIVe7az/pub?gid=1392774175&single=true&output=csv';
+        
+        let allData = [];
+        let activeGrade = 'all';
+
+        async function init() {
+            try {
+                // We gebruiken fetch() in plaats van PapaParse's eigen download tool, 
+                // dit is vaak betrouwbaarder in browsers.
+                const response = await fetch(CSV_URL);
+                if (!response.ok) throw new Error("Netwerk response was niet ok");
+                
+                const csvText = await response.text();
+                
+                Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true,
+                    transformHeader: function(h) {
+                        // Verwijder enters en spaties in kolomnamen (zoals "Jaar / fase")
+                        return h.replace(/\s/g, ' ').replace(/\n|\r/g, "").trim();
+                    },
+                    complete: function(results) {
+                        allData = results.data;
+                        setupUI();
+                    }
+                });
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('error-display').classList.remove('hidden');
+                document.getElementById('connection-status').innerText = "STATUS: GEBLOKKEERD";
+                document.getElementById('connection-status').classList.replace('bg-slate-100', 'bg-red-100');
+                document.getElementById('connection-status').classList.replace('text-slate-400', 'text-red-600');
+            }
+        }
+
+        function setupUI() {
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('ui-content').classList.remove('hidden');
+            document.getElementById('connection-status').innerText = "STATUS: LIVE";
+            document.getElementById('connection-status').classList.replace('text-slate-400', 'text-green-600');
+            document.getElementById('connection-status').classList.replace('bg-slate-100', 'bg-green-50');
+
+            const grades = [...new Set(allData.map(d => d['Jaar/fase']))].filter(Boolean).sort();
+            const domains = [...new Set(allData.map(d => d['Domein']))].filter(Boolean).sort();
+            
+            const gradeContainer = document.getElementById('grade-filters');
+            grades.forEach(g => {
+                const btn = document.createElement('button');
+                btn.className = "filter-btn px-4 py-2 rounded-xl border border-slate-200 text-sm font-bold transition hover:bg-slate-100";
+                btn.innerText = g;
+                btn.onclick = () => {
+                    activeGrade = g;
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    render();
+                };
+                gradeContainer.appendChild(btn);
+            });
+
+            const domSel = document.getElementById('domain-filter');
+            domSel.innerHTML = '<option value="all">Alle domeinen</option>';
+            domains.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d; opt.innerText = d;
+                domSel.appendChild(opt);
+            });
+
+            render();
+        }
+
+        function render() {
+            const container = document.getElementById('goals-container');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const domain = document.getElementById('domain-filter').value;
+            
+            const filtered = allData.filter(item => {
+                const mGrade = activeGrade === 'all' || item['Jaar/fase'] === activeGrade;
+                const mDomain = domain === 'all' || item['Domein'] === domain;
+                const mSearch = (item.Leerplandoel || "").toLowerCase().includes(search) || 
+                               (item.Voorbeelden || "").toLowerCase().includes(search) ||
+                               (item.Subdomein || "").toLowerCase().includes(search);
+                return mGrade && mDomain && mSearch;
+            });
+
+            document.getElementById('stats').innerText = `${filtered.length} resultaten gevonden`;
+            container.innerHTML = '';
+
+            filtered.forEach(item => {
+                const isMD = item.soort === 'MD';
+                const card = document.createElement('div');
+                card.className = `bg-white p-6 rounded-3xl border transition shadow-sm flex flex-col ${isMD ? 'border-blue-200 ring-1 ring-blue-100' : 'border-slate-100'}`;
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-[9px] font-black uppercase px-2 py-1 bg-slate-100 text-slate-500 rounded-lg tracking-widest">${item.Domein || 'Algemeen'}</span>
+                        <span class="text-[9px] text-slate-300 font-mono">${item.Code || ''}</span>
+                    </div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded font-bold">${item['Jaar/fase']}</span>
+                        <div class="text-sm font-black text-slate-800">${item.Subdomein || ''}</div>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-6 leading-relaxed font-medium">${item.Leerplandoel || ''}</p>
+                    ${item.Voorbeelden ? `
+                        <div class="mt-auto pt-4 border-t border-slate-50 italic text-slate-400 text-xs">
+                            <span class="font-black text-[9px] uppercase block mb-1 tracking-tighter">Voorbeeld:</span>
+                            ${item.Voorbeelden}
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
