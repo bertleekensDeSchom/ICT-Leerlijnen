@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICT Dashboard - Met Legende</title>
+    <title>ICT Dashboard - Klasvolgorde Correct</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -16,10 +16,10 @@
 </head>
 <body class="bg-[#f9fafb] min-h-screen pb-20">
 
-    <header class="bg-white border-b border-slate-100 sticky top-0 z-50 py-5 shadow-sm text-center md:text-left">
+    <header class="bg-white border-b border-slate-100 sticky top-0 z-50 py-5 shadow-sm">
         <div class="container mx-auto px-6 flex justify-between items-center">
             <h1 class="text-xl font-extrabold text-slate-900 tracking-tight italic">ICT <span class="text-blue-600 uppercase tracking-tighter italic">Doelenzoeker</span></h1>
-            <div id="conn-status" class="hidden md:block text-[10px] font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-400 uppercase tracking-widest leading-none">Verbinden...</div>
+            <div id="conn-status" class="hidden md:block text-[10px] font-bold px-4 py-1.5 rounded-full bg-slate-100 text-slate-400 uppercase tracking-widest leading-none tracking-widest">Excel Connectie...</div>
         </div>
     </header>
 
@@ -44,7 +44,7 @@
                             <span class="w-4 h-4 bg-blue-600 text-white rounded-full flex items-center justify-center text-[8px]">P</span> 
                             P-route (Fase 1-3)
                         </h4>
-                        <ul class="text-[11px] text-slate-500 space-y-1 font-medium">
+                        <ul class="text-[11px] text-slate-500 space-y-1 font-medium leading-relaxed">
                             <li><strong class="text-blue-700">Fase 1:</strong> ontw. leeftijd 0 tot 6/8 mnd</li>
                             <li><strong class="text-blue-700">Fase 2:</strong> ontw. leeftijd 6 tot 18 mnd</li>
                             <li><strong class="text-blue-700">Fase 3:</strong> ontw. leeftijd 18 mnd tot 2,5 jaar</li>
@@ -55,7 +55,7 @@
                             <span class="w-4 h-4 bg-slate-800 text-white rounded-full flex items-center justify-center text-[8px]">S</span> 
                             S-route (Fase 4-6)
                         </h4>
-                        <ul class="text-[11px] text-slate-500 space-y-1 font-medium">
+                        <ul class="text-[11px] text-slate-500 space-y-1 font-medium leading-relaxed">
                             <li><strong class="text-slate-700">Fase 4:</strong> ontw. leeftijd + 2,5 jaar</li>
                             <li><strong class="text-slate-700">Fase 5:</strong> ontw. leeftijd + 6 jaar</li>
                             <li><strong class="text-slate-700">Fase 6:</strong> ontw. leeftijd + 10 jaar</li>
@@ -64,25 +64,25 @@
                 </div>
 
                 <!-- Zoek & Filter Dropdowns -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-2">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-2 text-sm">
                     <div>
                         <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-3 block italic">Zoek trefwoord</label>
                         <input type="text" id="search-input" onkeyup="render()" placeholder="AI, muis, internet..." class="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none ring-2 ring-transparent focus:ring-blue-100 transition-all font-semibold text-slate-700">
                     </div>
                     <div>
                         <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-3 block italic">Domein</label>
-                        <select id="domain-select" onchange="render()" class="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-blue-100 text-slate-700"></select>
+                        <select id="domain-select" onchange="render()" class="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-blue-100 text-slate-700 shadow-sm"></select>
                     </div>
                     <div>
                         <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-3 block italic">Doelsoort</label>
-                        <select id="type-select" onchange="render()" class="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-blue-100 text-slate-700">
+                        <select id="type-select" onchange="render()" class="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-blue-100 text-slate-700 shadow-sm">
                             <option value="all">Alle soorten</option>
                         </select>
                     </div>
                 </div>
             </div>
 
-            <div id="result-count" class="mb-8 text-xs font-bold text-slate-400 uppercase tracking-[0.2em] px-4"></div>
+            <div id="result-count" class="mb-8 text-xs font-bold text-slate-400 uppercase tracking-[0.2em] px-4 italic"></div>
             
             <!-- Goals Grid -->
             <div id="goals-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
@@ -90,8 +90,8 @@
 
         <!-- Loader -->
         <div id="loading-screen" class="flex flex-col items-center justify-center py-40 text-center">
-            <div class="w-14 h-14 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-6 shadow-sm"></div>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] animate-pulse">Database live inladen...</p>
+            <div class="w-14 h-14 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-6 shadow-md"></div>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] animate-pulse">Laden...</p>
         </div>
     </main>
 
@@ -102,9 +102,10 @@
         let filterGrade = 'all';
         let colNames = { grade: '', domain: '', type: '', code: '', sub: '' };
 
+        // DE CORRECTE VOLGORDE:
         const gradeOrder = [
             "Fase 1", "Fase 2", "Fase 3", "Fase 4", "Fase 5", "Fase 6",
-            "Jongste kleuters", "2de kleuterklas", "3de kleuterklas",
+            "jongste kleuters", "2de kleuterklas", "3de kleuterklas",
             "Leerjaar 1", "Leerjaar 2", "Leerjaar 3", "Leerjaar 4", "Leerjaar 5", "Leerjaar 6",
             "Extra / Algemeen"
         ];
@@ -147,10 +148,12 @@
         function setupUI() {
             document.getElementById('loading-screen').classList.add('hidden');
             document.getElementById('main-content').classList.remove('hidden');
-            document.getElementById('conn-status').innerText = "Excel Verbonden";
+            document.getElementById('conn-status').innerText = "LIVE VERBONDEN";
             document.getElementById('conn-status').className = "hidden md:block text-[10px] font-bold px-4 py-1.5 rounded-full bg-green-600 text-white uppercase tracking-widest";
 
             let uniqueGradesInExcel = [...new Set(dataRows.map(r => r[colNames.grade]?.trim() || "Extra / Algemeen"))];
+            
+            // Sorteren op basis van de aangepaste gradeOrder
             uniqueGradesInExcel.sort((a, b) => {
                 let indexA = gradeOrder.indexOf(a);
                 let indexB = gradeOrder.indexOf(b);
@@ -200,7 +203,7 @@
                 return mG && mD && mT && mS;
             });
 
-            document.getElementById('result-count').innerText = `${filtered.length} leerplandoelen gevonden`;
+            document.getElementById('result-count').innerText = `${filtered.length} leerplandoelen gevonden voor deze selectie`;
             grid.innerHTML = '';
 
             filtered.forEach(r => {
@@ -209,13 +212,13 @@
                 card.className = `goal-card ${theme.bg} ${theme.border} p-8 rounded-[3rem] flex flex-col shadow-sm border-2`;
                 
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-6">
+                    <div class="flex justify-between items-start mb-6 text-[11px]">
                         <div class="flex flex-col gap-2">
                             <div class="flex gap-2">
-                                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-white ${theme.text} border border-slate-100 shadow-sm">${r[colNames.domain] || 'ICT'}</span>
-                                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-900 text-white shadow-sm">${r[colNames.type] || 'G'}</span>
+                                <span class="px-3 py-1 rounded-full font-black uppercase tracking-widest bg-white ${theme.text} border border-slate-100 shadow-sm">${r[colNames.domain] || 'ICT'}</span>
+                                <span class="px-3 py-1 rounded-full font-black uppercase tracking-widest bg-slate-900 text-white shadow-sm">${r[colNames.type] || 'G'}</span>
                             </div>
-                            <span class="text-[11px] font-bold text-slate-400 ml-1 tracking-wider uppercase italic">${r[colNames.grade] || 'Algemeen'}</span>
+                            <span class="font-bold text-slate-400 ml-1 tracking-wider uppercase italic">${r[colNames.grade] || 'Algemeen'}</span>
                         </div>
                         <div class="bg-white/90 px-3 py-1 rounded-xl border border-white shadow-sm">
                             <span class="text-sm font-black ${theme.text} tracking-tight italic">#${r[colNames.code] || ''}</span>
@@ -234,10 +237,10 @@
                     <div class="mt-auto">
                         <div class="flex items-center gap-2 mb-3">
                             <div class="h-px bg-slate-200 flex-1"></div>
-                            <span class="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">Voorbeeld</span>
+                            <span class="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">Praktijkvoorbeeld</span>
                             <div class="h-px bg-slate-200 flex-1"></div>
                         </div>
-                        <p class="text-slate-400 text-xs italic leading-relaxed px-2 text-center line-clamp-4 hover:line-clamp-none transition-all">"${r.Voorbeelden}"</p>
+                        <p class="text-slate-400 text-[11px] italic leading-relaxed px-2 text-center line-clamp-4 hover:line-clamp-none transition-all">"${r.Voorbeelden}"</p>
                     </div>` : ''}
                 `;
                 grid.appendChild(card);
