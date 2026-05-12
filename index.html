@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICT Dashboard - Klasvolgorde Correct</title>
+    <title>ICT Dashboard - Optimale Leesbaarheid</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .filter-btn.active { background-color: #1e293b; color: white; border-color: #1e293b; transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
@@ -19,7 +19,7 @@
     <header class="bg-white border-b border-slate-100 sticky top-0 z-50 py-5 shadow-sm">
         <div class="container mx-auto px-6 flex justify-between items-center">
             <h1 class="text-xl font-extrabold text-slate-900 tracking-tight italic">ICT <span class="text-blue-600 uppercase tracking-tighter italic">Doelenzoeker</span></h1>
-            <div id="conn-status" class="hidden md:block text-[10px] font-bold px-4 py-1.5 rounded-full bg-slate-100 text-slate-400 uppercase tracking-widest leading-none tracking-widest">Excel Connectie...</div>
+            <div id="conn-status" class="hidden md:block text-[10px] font-bold px-4 py-1.5 rounded-full bg-slate-100 text-slate-400 uppercase tracking-widest leading-none">Excel Connectie...</div>
         </div>
     </header>
 
@@ -102,7 +102,6 @@
         let filterGrade = 'all';
         let colNames = { grade: '', domain: '', type: '', code: '', sub: '' };
 
-        // DE CORRECTE VOLGORDE:
         const gradeOrder = [
             "Fase 1", "Fase 2", "Fase 3", "Fase 4", "Fase 5", "Fase 6",
             "jongste kleuters", "2de kleuterklas", "3de kleuterklas",
@@ -153,7 +152,6 @@
 
             let uniqueGradesInExcel = [...new Set(dataRows.map(r => r[colNames.grade]?.trim() || "Extra / Algemeen"))];
             
-            // Sorteren op basis van de aangepaste gradeOrder
             uniqueGradesInExcel.sort((a, b) => {
                 let indexA = gradeOrder.indexOf(a);
                 let indexB = gradeOrder.indexOf(b);
@@ -234,13 +232,11 @@
                     </div>
                     
                     ${r.Voorbeelden ? `
-                    <div class="mt-auto">
-                        <div class="flex items-center gap-2 mb-3">
-                            <div class="h-px bg-slate-200 flex-1"></div>
-                            <span class="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">Praktijkvoorbeeld</span>
-                            <div class="h-px bg-slate-200 flex-1"></div>
+                    <div class="mt-auto pt-4 border-t border-slate-100">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Praktijkvoorbeeld</span>
+                        <div class="border-l-2 border-slate-300 pl-3">
+                            <p class="text-slate-600 text-xs md:text-sm font-semibold italic leading-relaxed">"${r.Voorbeelden}"</p>
                         </div>
-                        <p class="text-slate-400 text-[11px] italic leading-relaxed px-2 text-center line-clamp-4 hover:line-clamp-none transition-all">"${r.Voorbeelden}"</p>
                     </div>` : ''}
                 `;
                 grid.appendChild(card);
