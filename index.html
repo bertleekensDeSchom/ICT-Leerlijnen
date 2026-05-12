@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICT Dashboard - Compact & Leesbaar</title>
+    <title>ICT Dashboard - Interactief & Compact</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -11,8 +11,8 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .filter-btn.active { background-color: #1e293b; color: white; border-color: #1e293b; transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
         .goal-card { transition: all 0.3s ease; border-width: 2px; }
-        .goal-card:hover { transform: translateY(-5px); box-shadow: 0 25px 30px -10px rgba(0,0,0,0.1); }
-        #legend-container { transition: all 0.3s ease-in-out; }
+        .goal-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -5px rgba(0,0,0,0.05); }
+        .expand-content { transition: max-height 0.3s ease-out, opacity 0.3s ease-out; overflow: hidden; }
     </style>
 </head>
 <body class="bg-[#f9fafb] min-h-screen pb-20">
@@ -32,14 +32,19 @@
                 
                 <!-- Jaar/Fase Selectie en Toggle Legende -->
                 <div class="mb-6">
-                    <div class="flex justify-between items-end mb-4">
-                        <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] block underline decoration-blue-200 decoration-2 underline-offset-4 italic text-sm md:text-base">Selecteer Jaar / Fase</label>
-                        <button onclick="toggleLegend()" class="text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-xl hover:bg-blue-100 transition-colors flex items-center gap-2">
-                            <span id="legend-icon">ℹ️</span> <span id="legend-text">Toon info over de fasen</span>
-                        </button>
-                    </div>
-                    <div id="grade-buttons" class="flex flex-wrap gap-2">
-                        <button onclick="location.reload()" id="btn-all" class="filter-btn active px-6 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold transition-all hover:bg-slate-50 shadow-sm">Alle doelen</button>
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-4">
+                        <div class="flex-1">
+                            <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] block underline decoration-blue-200 decoration-2 underline-offset-4 italic text-sm mb-2">Selecteer Jaar / Fase</label>
+                            <div id="grade-buttons" class="flex flex-wrap gap-2">
+                                <button onclick="location.reload()" id="btn-all" class="filter-btn active px-6 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold transition-all hover:bg-slate-50 shadow-sm">Alle doelen</button>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 w-full md:w-auto">
+                            <button onclick="toggleAllCards(true)" class="flex-1 md:flex-none text-[10px] font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl hover:bg-slate-200 transition-colors">↔️ Klap alles uit</button>
+                            <button onclick="toggleLegend()" class="flex-1 md:flex-none text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-xl hover:bg-blue-100 transition-colors flex items-center justify-center gap-2">
+                                <span id="legend-icon">ℹ️</span> <span id="legend-text">Info fasen</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -50,7 +55,7 @@
                             <span class="w-4 h-4 bg-blue-600 text-white rounded-full flex items-center justify-center text-[8px]">P</span> 
                             P-route (Fase 1-3)
                         </h4>
-                        <ul class="text-xs text-slate-600 space-y-1.5 font-medium leading-relaxed">
+                        <ul class="text-xs text-slate-600 space-y-1.5 font-medium">
                             <li><strong class="text-blue-700">Fase 1:</strong> ontw. leeftijd 0 tot 6/8 mnd</li>
                             <li><strong class="text-blue-700">Fase 2:</strong> ontw. leeftijd 6 tot 18 mnd</li>
                             <li><strong class="text-blue-700">Fase 3:</strong> ontw. leeftijd 18 mnd tot 2,5 jaar</li>
@@ -61,7 +66,7 @@
                             <span class="w-4 h-4 bg-slate-800 text-white rounded-full flex items-center justify-center text-[8px]">S</span> 
                             S-route (Fase 4-6)
                         </h4>
-                        <ul class="text-xs text-slate-600 space-y-1.5 font-medium leading-relaxed">
+                        <ul class="text-xs text-slate-600 space-y-1.5 font-medium">
                             <li><strong class="text-slate-700">Fase 4:</strong> ontw. leeftijd + 2,5 jaar</li>
                             <li><strong class="text-slate-700">Fase 5:</strong> ontw. leeftijd + 6 jaar</li>
                             <li><strong class="text-slate-700">Fase 6:</strong> ontw. leeftijd + 10 jaar</li>
@@ -72,15 +77,15 @@
                 <!-- Zoek & Filter Dropdowns -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-2 text-sm border-t border-slate-50 mt-6 pt-6">
                     <div>
-                        <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-3 block italic">Zoek trefwoord</label>
+                        <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-3 block italic text-xs">Zoek trefwoord</label>
                         <input type="text" id="search-input" onkeyup="render()" placeholder="AI, muis, internet..." class="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none ring-2 ring-transparent focus:ring-blue-100 transition-all font-semibold text-slate-700 shadow-inner">
                     </div>
                     <div>
-                        <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-3 block italic">Domein</label>
+                        <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-3 block italic text-xs">Domein</label>
                         <select id="domain-select" onchange="render()" class="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-blue-100 text-slate-700 shadow-inner"></select>
                     </div>
                     <div>
-                        <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-3 block italic">Doelsoort</label>
+                        <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-3 block italic text-xs">Doelsoort</label>
                         <select id="type-select" onchange="render()" class="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-blue-100 text-slate-700 shadow-inner">
                             <option value="all">Alle soorten</option>
                         </select>
@@ -134,14 +139,53 @@
             const container = document.getElementById('legend-container');
             const text = document.getElementById('legend-text');
             const icon = document.getElementById('legend-icon');
-            if (container.classList.contains('hidden')) {
-                container.classList.remove('hidden');
-                text.innerText = "Verberg info";
-                icon.innerText = "❌";
+            container.classList.toggle('hidden');
+            text.innerText = container.classList.contains('hidden') ? "Info fasen" : "Verberg info";
+            icon.innerText = container.classList.contains('hidden') ? "ℹ️" : "❌";
+        }
+
+        function toggleCard(id) {
+            const content = document.getElementById(`content-${id}`);
+            const btn = document.getElementById(`btn-${id}`);
+            const isHidden = content.classList.contains('hidden');
+            
+            if (isHidden) {
+                content.classList.remove('hidden');
+                btn.innerText = "Verberg details 🔼";
+                btn.classList.replace('bg-white/60', 'bg-slate-800');
+                btn.classList.replace('text-slate-600', 'text-white');
             } else {
-                container.classList.add('hidden');
-                text.innerText = "Toon info over de fasen";
-                icon.innerText = "ℹ️";
+                content.classList.add('hidden');
+                btn.innerText = "Toon details 🔽";
+                btn.classList.replace('bg-slate-800', 'bg-white/60');
+                btn.classList.replace('text-white', 'text-slate-600');
+            }
+        }
+
+        function toggleAllCards(expand) {
+            const cards = document.querySelectorAll('[id^="content-"]');
+            const btns = document.querySelectorAll('[id^="btn-"]');
+            cards.forEach((c, i) => {
+                if (expand) {
+                    c.classList.remove('hidden');
+                    btns[i].innerText = "Verberg details 🔼";
+                    btns[i].classList.replace('bg-white/60', 'bg-slate-800');
+                    btns[i].classList.replace('text-slate-600', 'text-white');
+                } else {
+                    c.classList.add('hidden');
+                    btns[i].innerText = "Toon details 🔽";
+                    btns[i].classList.replace('bg-slate-800', 'bg-white/60');
+                    btns[i].classList.replace('text-white', 'text-slate-600');
+                }
+            });
+            
+            const mainBtn = event.target;
+            if (expand) {
+                mainBtn.innerText = "🔝 Klap alles in";
+                mainBtn.onclick = () => toggleAllCards(false);
+            } else {
+                mainBtn.innerText = "↔️ Klap alles uit";
+                mainBtn.onclick = () => toggleAllCards(true);
             }
         }
 
@@ -224,49 +268,7 @@
             document.getElementById('result-count').innerText = `${filtered.length} leerplandoelen gevonden`;
             grid.innerHTML = '';
 
-            filtered.forEach(r => {
+            filtered.forEach((r, index) => {
                 const theme = getTheme(r[colNames.domain]);
                 const card = document.createElement('div');
-                card.className = `goal-card ${theme.bg} ${theme.border} p-8 rounded-[3rem] flex flex-col shadow-sm border-2`;
-                
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-6 text-[11px]">
-                        <div class="flex flex-col gap-2">
-                            <div class="flex gap-2">
-                                <span class="px-3 py-1 rounded-full font-black uppercase tracking-widest bg-white ${theme.text} border border-slate-100 shadow-sm">${r[colNames.domain] || 'ICT'}</span>
-                                <span class="px-3 py-1 rounded-full font-black uppercase tracking-widest bg-slate-900 text-white shadow-sm">${r[colNames.type] || 'G'}</span>
-                            </div>
-                            <span class="font-bold text-slate-400 ml-1 tracking-wider uppercase italic">${r[colNames.grade] || 'Algemeen'}</span>
-                        </div>
-                        <div class="bg-white/90 px-3 py-1 rounded-xl border border-white shadow-sm">
-                            <span class="text-sm font-black ${theme.text} tracking-tight italic">#${r[colNames.code] || ''}</span>
-                        </div>
-                    </div>
-                    
-                    <h3 class="text-slate-900 font-extrabold text-base leading-snug mb-4">
-                        ${r[colNames.sub] || 'Doelstelling'}
-                    </h3>
-
-                    <!-- LEERPLANDOEL -->
-                    <div class="text-slate-700 text-[14px] leading-relaxed font-medium mb-3 bg-white/60 p-5 rounded-3xl border border-white/50 shadow-inner">
-                        ${r.Leerplandoel || ''}
-                    </div>
-                    
-                    <!-- PRAKTIJKVOORBEELD -->
-                    ${r.Voorbeelden ? `
-                    <div class="bg-white/40 p-4 rounded-2xl border border-white/40 shadow-sm mt-1">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Praktijkvoorbeeld</span>
-                            <div class="h-px bg-slate-200 flex-1 opacity-50"></div>
-                        </div>
-                        <p class="text-slate-600 text-sm italic leading-relaxed font-medium">"${r.Voorbeelden}"</p>
-                    </div>` : ''}
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        window.onload = init;
-    </script>
-</body>
-</html>
+                card.className = `goal-card ${theme.bg} ${theme.border} p-6 md:p-8 rou
