@@ -271,4 +271,52 @@
             filtered.forEach((r, index) => {
                 const theme = getTheme(r[colNames.domain]);
                 const card = document.createElement('div');
-                card.className = `goal-card ${theme.bg} ${theme.border} p-6 md:p-8 rou
+                card.className = `goal-card ${theme.bg} ${theme.border} p-6 md:p-8 rounded-[3rem] flex flex-col shadow-sm border-2`;
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-6 text-[11px]">
+                        <div class="flex flex-col gap-2">
+                            <div class="flex gap-2">
+                                <span class="px-3 py-1 rounded-full font-black uppercase tracking-widest bg-white ${theme.text} border border-slate-100 shadow-sm">${r[colNames.domain] || 'ICT'}</span>
+                                <span class="px-3 py-1 rounded-full font-black uppercase tracking-widest bg-slate-900 text-white shadow-sm">${r[colNames.type] || 'G'}</span>
+                            </div>
+                            <span class="font-bold text-slate-400 ml-1 tracking-wider uppercase italic">${r[colNames.grade] || 'Algemeen'}</span>
+                        </div>
+                        <div class="bg-white/90 px-3 py-1 rounded-xl border border-white shadow-sm">
+                            <span class="text-sm font-black ${theme.text} tracking-tight italic">#${r[colNames.code] || ''}</span>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-slate-900 font-extrabold text-base leading-snug mb-4">
+                        ${r[colNames.sub] || 'Doelstelling'}
+                    </h3>
+
+                    <!-- UITVOUWBAAR GEDEELTE -->
+                    <div id="content-${index}" class="hidden space-y-4">
+                        <div class="text-slate-700 text-[14px] leading-relaxed font-medium bg-white/60 p-5 rounded-3xl border border-white/50 shadow-inner">
+                            ${r.Leerplandoel || ''}
+                        </div>
+                        
+                        ${r.Voorbeelden ? `
+                        <div class="bg-white/40 p-4 rounded-2xl border border-white/40 shadow-sm">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Praktijkvoorbeeld</span>
+                                <div class="h-px bg-slate-200 flex-1 opacity-50"></div>
+                            </div>
+                            <p class="text-slate-600 text-sm italic leading-relaxed font-medium">"${r.Voorbeelden}"</p>
+                        </div>` : ''}
+                    </div>
+
+                    <!-- TOGGLE BUTTON -->
+                    <button id="btn-${index}" onclick="toggleCard(${index})" class="mt-4 w-full py-2 rounded-2xl bg-white/60 text-slate-600 text-[10px] font-bold uppercase tracking-widest hover:bg-white transition-all border border-white/50 shadow-sm">
+                        Toon details 🔽
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
