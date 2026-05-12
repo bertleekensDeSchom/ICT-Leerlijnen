@@ -3,57 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICT Dashboard - Volledig Hersteld</title>
+    <title>ICT Doelen Dashboard - Kleurcodes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        .filter-btn.active { background-color: #2563eb; color: white; border-color: #2563eb; transform: scale(1.05); }
-        .loading-spinner { border-top-color: #2563eb; animation: spin 1s linear infinite; }
+        body { font-family: 'Inter', sans-serif; }
+        .filter-btn.active { background-color: #1e293b; color: white; border-color: #1e293b; }
+        .loading-spinner { border-top-color: #3b82f6; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .goal-card { transition: all 0.2s ease-in-out; }
-        .goal-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .goal-card { transition: all 0.25s ease; border-width: 2px; }
+        .goal-card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen pb-10">
+<body class="bg-[#f8fafc] min-h-screen pb-20">
 
-    <header class="bg-blue-700 text-white p-6 shadow-lg mb-8">
-        <div class="container mx-auto">
-            <h1 class="text-2xl font-black tracking-tight uppercase">ICT Doelen Dashboard</h1>
-            <div id="connection-status" class="inline-block mt-2 text-[10px] bg-blue-800 px-3 py-1 rounded-full text-blue-200 font-bold uppercase tracking-widest">
-                Data laden...
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 py-4 shadow-sm">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 text-white p-2 rounded-xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <h1 class="text-xl font-black text-slate-800 tracking-tight uppercase italic">ICT <span class="text-blue-600 italic">Doelenzoeker</span></h1>
             </div>
+            <div id="connection-status" class="text-[10px] font-black px-4 py-1.5 rounded-full bg-slate-100 text-slate-400 uppercase tracking-[0.2em]">Verbinden...</div>
         </div>
     </header>
 
-    <main class="container mx-auto px-4">
+    <main class="container mx-auto px-4 mt-8">
         
         <!-- Filter Paneel -->
         <div id="ui-pane" class="hidden">
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-8">
-                <div class="mb-6">
-                    <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3">Filter op Leerjaar / Fase</label>
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200 mb-10">
+                <div class="mb-8">
+                    <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-1">Kies Leerjaar of Fase</label>
                     <div id="grade-filters" class="flex flex-wrap gap-2">
-                        <button onclick="setGrade('all')" id="btn-all" class="filter-btn active px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-bold transition-all shadow-sm">Alle</button>
+                        <button onclick="setGrade('all')" id="btn-all" class="filter-btn active px-6 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold transition-all hover:bg-slate-50">Alle doelen</button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Zoeken</label>
-                        <input type="text" id="search-input" onkeyup="render()" placeholder="Typ een onderwerp (AI, muis, privacy...)" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
+                    <div class="lg:col-span-1">
+                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Snel zoeken</label>
+                        <input type="text" id="search-input" onkeyup="render()" placeholder="Zoek op tekst of trefwoord..." class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-100 transition-all font-medium">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Domein</label>
-                        <select id="domain-filter" onchange="render()" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-medium appearance-none cursor-pointer"></select>
+                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Domein filter</label>
+                        <select id="domain-filter" onchange="render()" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold appearance-none cursor-pointer focus:ring-4 focus:ring-blue-100"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Doelsoort filter</label>
+                        <select id="type-filter" onchange="render()" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold appearance-none cursor-pointer focus:ring-4 focus:ring-blue-100">
+                            <option value="all">Alle soorten (G, MD, P, S)</option>
+                        </select>
                     </div>
                 </div>
             </div>
 
-            <div id="stats" class="mb-6 text-xs font-black text-slate-400 uppercase tracking-widest px-2"></div>
-            <div id="goals-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            <div id="stats" class="mb-6 text-sm font-bold text-slate-400 px-4"></div>
+            <div id="goals-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
         </div>
 
         <!-- Loader -->
         <div id="loader" class="flex flex-col items-center justify-center py-32 text-center">
-            <div class="loading-spinner w-12 h-12 border-4 border-slate-200 rounded-full mb-6"></div>
-            <p class="text-slate-400 font
+            <div class="loading-spinner w-14 h-14 border-4 border-slate-200 rounded-full mb-6"></div>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-xs">Live data ophalen uit Excel...</p>
+        </div>
+    </main>
+
+    <script>
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCFdDnFXhAe6lt-EzZ-VeHTg54dWNk-PuIDtYTN1hUd_yDxnhaUhdy1hQDx3QXjGtZIhmwUfIVe7az/pub?gid=1392774175&single=true&output=csv';
+        
+        let allData = [];
+        let activeGrade = 'all';
+        let cols = { grade: '', domain: '', type: '', code: '' };
+
+        async function init() {
+            try {
+                const response = await fetch(CSV_URL);
+                const csvText = await response.text();
+                Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        allData = results.data;
+                        mapColumns(results.meta.fields);
+                        setupUI();
+                    }
+                });
+            } catch (err) {
+                document.getElementById('connection-status').innerText = "FOUT: Geen verbinding";
+                document.getElementById('connection-status').classList.add('bg-red-500', 'text-white');
+            }
+        }
+
+        function mapColumns(fields) {
+            fields.forEach(f => {
+                const l = f.toLowerCase();
+                if (l.includes('jaar') || l.includes('fase')) cols.grade = f;
+                if (l.includes('domein')) cols.domain = f;
+                if (l.includes('soort')) cols.type = f;
+                if (l.includes('code')) cols.code = f;
+            });
+        }
+
+        function getDomeinStyle(domein) {
+            const d = (domein || "").toLowerCase();
+            if (d.includes("computationeel")) return { bg: "bg-purple-50", border: "border-purple-200", text: "text-purple-700", dark: "bg-purple-600" };
+            if (d.includes("informatieveiligheid")) return { bg: "bg-rose-50", border: "border-rose-200", text: "text-rose-700", dark: "bg-rose-600" };
+            if (d.includes("mediawijsheid")) return { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-700", dark: "bg-amber-600" };
+            if (d.includes("creatie")) return { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-700", dark: "bg-emerald-600" };
+            if (d.includes("geletterdheid")) return { bg: "bg-sky-50", border: "border-sky-200", text: "text-sky-700", dark: "bg-sky-600" };
+            return { bg: "bg-slate-50", border: "border-slate-200", text: "text-slate-700", dark: "bg-slate-600" };
+        }
+
+        function setupUI() {
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('ui-pane').classList.remove('hidden');
+            document.getElementById('connection-status').innerText = "EXCEL LIVE";
+            document.getElementById('connection-status').classList.replace('bg-slate-100', 'bg-green-500');
+            document.getElementById('connection-status').classList.replace('text-slate-400', 'text-white');
+
+            const grades = [...new Set(allData.map(d => d[cols.grade]))].filter(Boolean).sort();
+            const gradeContainer = document.getElementById('grade-filters');
+            grades.forEach(g => {
+                const btn = document.createElement('button');
+                btn.className = "filter-btn px-6 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold transition-all shadow-sm hover:bg-slate-50";
+                btn.innerText = g;
+                btn.onclick = () => {
+                    activeGrade = g;
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    render();
+                };
+                gradeContainer.appendChild(btn);
+            });
+
+            const domains = [...new Set(allData.map(d => d[cols.domain]))].filter(Boolean).sort();
+            const domSel = document.getElementById('domain-filter');
+            domSel.innerHTML = '<option value="all">Alle domeinen</option>';
+            domains.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d; opt.innerText = d;
+                domSel.appendChild(opt);
+            });
+
+            const types = [...new Set(allData.map(d => d[cols.type]))].filter(Boolean).sort();
+            const typeSel = document.getElementById('type-filter');
+            types.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t; opt.innerText = `Soort: ${t}`;
+                typeSel.appendChild(opt);
+            });
+
+            render();
+        }
+
+        function render() {
+            const container = document.getElementById('goals-container');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const domainF = document.getElementById('domain-filter').value;
+            const typeF = document.getElementById('type-filter').value;
+            
+            const filtered = allData.filter(item => {
+                const mGrade = activeGrade === 'all' || item[cols.grade] === activeGrade;
+                const mDomain = domainF === 'all' || item[cols.domain] === domainF;
+                const mType = typeF === 'all' || item[cols.type] === typeF;
+                const mSearch = (item.Leerplandoel || "").toLowerCase().includes(search) || (item.Voorbeelden || "").toLowerCase().includes(search);
+                return mGrade && mDomain && mType && mSearch;
+            });
+
+            document.getElementById('stats').innerText = `${filtered.length} doelen gevonden voor jouw selectie`;
+            container.innerHTML = '';
+
+            filtered.forEach(item => {
+                const style = getDomeinStyle(item[cols.domain]);
+                const card = document.createElement('div');
+                card.className = `goal-card ${style.bg} ${style.border} p-7 rounded-[2.5rem] flex flex-col`;
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="flex flex-col gap-2">
+                             <div class="flex items-center gap-2">
+                                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-white ${style.text} shadow-sm border border-inherit">
+                                    ${item[cols.domain] || 'Algemeen'}
+                                </span>
+                                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-800 text-white shadow-sm">
+                                    ${item[cols.type] || 'G'}
+                                </span>
+                            </div>
+                            <span class="text-xs font-black ${style.text} mt-1 opacity-70">${item[cols.grade] || ''}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-lg font-black ${style.text} tracking-tighter block leading-none">#${item[cols.code] || '??'}</span>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-slate-800 font-black text-lg leading-tight mb-4 min-h-[3rem]">
+                        ${item.Subdomein || 'Leerplandoel'}
+                    </h3>
+
+                    <div class="text-slate-700 text-sm leading-relaxed font-medium mb-8 bg-white/50 p-4 rounded-2xl border border-white/60 shadow-inner">
+                        ${item.Leerplandoel || ''}
+                    </div>
+                    
+                    ${item.Voorbeelden ? `
+                    <div class="mt-auto">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="h-px flex-1 bg-slate-200"></span>
+                            <span class="text-[9px] font-black uppercase text-slate-400 tracking-widest">Praktijkvoorbeeld</span>
+                            <span class="h-px flex-1 bg-slate-200"></span>
+                        </div>
+                        <p class="text-slate-500 text-xs italic leading-snug px-2 text-center">"${item.Voorbeelden}"</p>
+                    </div>` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
