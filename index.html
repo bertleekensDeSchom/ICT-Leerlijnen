@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICT Doelenzoeker - Compact & Helder</title>
+    <title>ICT Doelenzoeker - Volledig Overzicht</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -18,8 +18,8 @@
 
     <header class="bg-white border-b border-slate-100 sticky top-0 z-50 py-4 shadow-sm">
         <div class="container mx-auto px-6 flex justify-between items-center">
-            <h1 class="text-xl font-extrabold text-slate-900 tracking-tight italic">ICT <span class="text-blue-600 uppercase tracking-tighter italic">Doelenzoeker</span></h1>
-            <div id="conn-status" class="hidden md:block text-[10px] font-bold px-4 py-1.5 rounded-full bg-slate-100 text-slate-400 uppercase tracking-widest leading-none tracking-widest">Excel Connectie...</div>
+            <h1 class="text-xl font-extrabold text-slate-900 tracking-tight italic">ICT <span class="text-blue-600 uppercase tracking-tighter italic text-2xl">Doelenzoeker</span></h1>
+            <div id="conn-status" class="hidden md:block text-[10px] font-bold px-4 py-1.5 rounded-full bg-slate-100 text-slate-400 uppercase tracking-widest leading-none">Verbinden...</div>
         </div>
     </header>
 
@@ -95,7 +95,7 @@
         let dataRows = [];
         let filterGrade = 'all';
         let allExamplesShown = false;
-        let colNames = { grade: '', domain: '', type: '', code: '', sub: '', goal: '', example: '' };
+        let colNames = { grade: '', domain: '', type: '', code: '', sub: '', goal: '', example: '', vocab: '' };
 
         const gradeOrder = [
             "Fase 1", "Fase 2", "Fase 3", "Fase 4", "Fase 5", "Fase 6",
@@ -129,6 +129,7 @@
                 if (lower.includes('subdomein')) colNames.sub = h;
                 if (lower.includes('leerplandoel')) colNames.goal = h;
                 if (lower.includes('voorbeeld')) colNames.example = h;
+                if (lower.includes('woordenschat')) colNames.vocab = h;
             });
         }
 
@@ -227,7 +228,10 @@
                 const mG = filterGrade === 'all' || curVal === filterGrade;
                 const mD = domF === 'all' || r[colNames.domain] === domF;
                 const mT = typF === 'all' || r[colNames.type] === typF;
-                const mS = (r[colNames.goal] || "").toLowerCase().includes(query) || (r[colNames.example] || "").toLowerCase().includes(query) || (r[colNames.sub] || "").toLowerCase().includes(query);
+                const mS = (r[colNames.goal] || "").toLowerCase().includes(query) || 
+                           (r[colNames.example] || "").toLowerCase().includes(query) || 
+                           (r[colNames.sub] || "").toLowerCase().includes(query) ||
+                           (r[colNames.vocab] || "").toLowerCase().includes(query);
                 return mG && mD && mT && mS;
             });
 
@@ -253,10 +257,20 @@
                     
                     <h3 class="text-slate-900 font-extrabold text-sm md:text-base leading-snug mb-3 uppercase tracking-tight">${r[colNames.sub] || ''}</h3>
 
-                    <!-- LEERPLANDOEL (ALTIJD ZICHTBAAR) -->
+                    <!-- LEERPLANDOEL -->
                     <div class="text-slate-700 text-[13px] md:text-[14px] leading-relaxed font-medium bg-white/70 p-5 rounded-3xl border border-white/50 shadow-inner mb-3">
                         ${r[colNames.goal] || ''}
                     </div>
+
+                    <!-- WOORDENSCHAT (Indien ingevuld) -->
+                    ${r[colNames.vocab] ? `
+                    <div class="flex items-start gap-2 px-4 mb-3 opacity-80">
+                        <span class="text-[10px] mt-0.5">🏷️</span>
+                        <p class="text-[11px] font-bold text-slate-500 italic leading-tight">
+                            <span class="uppercase text-[9px] not-italic tracking-wider opacity-60">Woordenschat:</span> ${r[colNames.vocab]}
+                        </p>
+                    </div>
+                    ` : ''}
                     
                     <!-- PRAKTIJKVOORBEELD (UITVOUWBAAR) -->
                     ${r[colNames.example] ? `
