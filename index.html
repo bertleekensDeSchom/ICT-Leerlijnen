@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICT Dashboard - Code Fixed</title>
+    <title>ICT Dashboard - Volledig Overzicht</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .filter-btn.active { background-color: #1e293b; color: white; border-color: #1e293b; transform: translateY(-2px); }
+        .filter-btn.active { background-color: #1e293b; color: white; border-color: #1e293b; transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
         .goal-card { transition: all 0.3s ease; border-width: 2px; }
         .goal-card:hover { transform: translateY(-5px); box-shadow: 0 25px 30px -10px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body class="bg-[#f9fafb] min-h-screen pb-20">
 
-    <header class="bg-white border-b border-slate-100 sticky top-0 z-50 py-5 shadow-sm">
+    <header class="bg-white border-b border-slate-100 sticky top-0 z-50 py-5 shadow-sm text-center md:text-left">
         <div class="container mx-auto px-6 flex justify-between items-center">
-            <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">ICT <span class="text-blue-600 uppercase">Doelenzoeker</span></h1>
-            <div id="conn-status" class="text-[10px] font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-400 uppercase tracking-widest leading-none">Laden...</div>
+            <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">ICT <span class="text-blue-600 uppercase tracking-tighter">Doelenzoeker</span></h1>
+            <div id="conn-status" class="hidden md:block text-[10px] font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-400 uppercase tracking-widest">Laden...</div>
         </div>
     </header>
 
@@ -27,11 +27,11 @@
         
         <div id="main-content" class="hidden">
             <!-- Filter Dashboard -->
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 mb-10">
+            <div class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-100 mb-10">
                 <div class="mb-10">
-                    <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4 block">Selecteer Leerjaar</label>
+                    <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4 block">Selecteer Leerjaar / Fase</label>
                     <div id="grade-buttons" class="flex flex-wrap gap-2">
-                        <button onclick="updateGrade('all')" id="btn-all" class="filter-btn active px-6 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold transition-all">Alle</button>
+                        <button onclick="updateGrade('all')" id="btn-all" class="filter-btn active px-6 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold transition-all hover:bg-slate-50">Alle doelen</button>
                     </div>
                 </div>
 
@@ -86,43 +86,45 @@
                         setupUI();
                     }
                 });
-            } catch (e) {
-                console.error("Laden mislukt", e);
-            }
+            } catch (e) { console.error(e); }
         }
 
         function identifyColumns(headers) {
             headers.forEach(h => {
                 const lower = h.toLowerCase().trim();
-                // Specifieke matching om de juiste "Code" kolom te pakken
                 if (lower === 'code') colNames.code = h;
                 if (lower.includes('jaar') || lower.includes('fase')) colNames.grade = h;
                 if (lower === 'domein') colNames.domain = h;
                 if (lower === 'soort') colNames.type = h;
                 if (lower.includes('subdomein')) colNames.sub = h;
             });
-            // Fallback als exacte match niet werkt
-            if (!colNames.code) colNames.code = headers.find(h => h.toLowerCase().includes('code'));
         }
 
         function getTheme(domein) {
             const d = (domein || "").toLowerCase();
-            if (d.includes("computationeel")) return { bg: "bg-indigo-50/70", border: "border-indigo-100", text: "text-indigo-700", badge: "bg-indigo-600" };
-            if (d.includes("veiligheid")) return { bg: "bg-rose-50/70", border: "border-rose-100", text: "text-rose-700", badge: "bg-rose-600" };
-            if (d.includes("mediawijsheid")) return { bg: "bg-amber-50/70", border: "border-amber-100", text: "text-amber-700", badge: "bg-amber-600" };
-            if (d.includes("creatie")) return { bg: "bg-emerald-50/70", border: "border-emerald-100", text: "text-emerald-700", badge: "bg-emerald-600" };
-            return { bg: "bg-blue-50/70", border: "border-blue-100", text: "text-blue-700", badge: "bg-blue-600" };
+            if (d.includes("computationeel")) return { bg: "bg-indigo-50/70", border: "border-indigo-100", text: "text-indigo-700" };
+            if (d.includes("veiligheid")) return { bg: "bg-rose-50/70", border: "border-rose-100", text: "text-rose-700" };
+            if (d.includes("mediawijsheid")) return { bg: "bg-amber-50/70", border: "border-amber-100", text: "text-amber-700" };
+            if (d.includes("creatie")) return { bg: "bg-emerald-50/70", border: "border-emerald-100", text: "text-emerald-700" };
+            return { bg: "bg-blue-50/70", border: "border-blue-100", text: "text-blue-700" };
         }
 
         function setupUI() {
             document.getElementById('loading-screen').classList.add('hidden');
             document.getElementById('main-content').classList.remove('hidden');
-            document.getElementById('conn-status').innerText = "Excel Verbonden";
-            document.getElementById('conn-status').className = "text-[10px] font-bold px-3 py-1 rounded-full bg-green-500 text-white uppercase tracking-widest";
+            document.getElementById('conn-status').innerText = "Verbonden";
+            document.getElementById('conn-status').className = "hidden md:block text-[10px] font-bold px-3 py-1 rounded-full bg-green-500 text-white uppercase tracking-widest";
 
-            const grades = [...new Set(dataRows.map(r => r[colNames.grade]))].filter(Boolean).sort();
+            // Haal alle leerjaren op en vervang lege door "Extra / Algemeen"
+            let gradeList = dataRows.map(r => r[colNames.grade]?.trim() || "Extra / Algemeen");
+            let uniqueGrades = [...new Set(gradeList)].sort((a, b) => {
+                if (a === "Extra / Algemeen") return 1;
+                if (b === "Extra / Algemeen") return -1;
+                return a.localeCompare(b, undefined, {numeric: true});
+            });
+
             const gCont = document.getElementById('grade-buttons');
-            grades.forEach(g => {
+            uniqueGrades.forEach(g => {
                 const btn = document.createElement('button');
                 btn.className = "filter-btn px-6 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold transition-all hover:bg-slate-50";
                 btn.innerText = g;
@@ -154,20 +156,21 @@
             const grid = document.getElementById('goals-grid');
             
             const filtered = dataRows.filter(r => {
-                const mG = filterGrade === 'all' || r[colNames.grade] === filterGrade;
+                const currentVal = r[colNames.grade]?.trim() || "Extra / Algemeen";
+                const mG = filterGrade === 'all' || currentVal === filterGrade;
                 const mD = domF === 'all' || r[colNames.domain] === domF;
                 const mT = typF === 'all' || r[colNames.type] === typF;
                 const mS = (r.Leerplandoel || "").toLowerCase().includes(search) || (r.Voorbeelden || "").toLowerCase().includes(search);
                 return mG && mD && mT && mS;
             });
 
-            document.getElementById('result-count').innerText = `${filtered.length} leerplandoelen gevonden`;
+            document.getElementById('result-count').innerText = `${filtered.length} resultaten`;
             grid.innerHTML = '';
 
             filtered.forEach(r => {
                 const theme = getTheme(r[colNames.domain]);
                 const card = document.createElement('div');
-                card.className = `goal-card ${theme.bg} ${theme.border} p-8 rounded-[3rem] flex flex-col`;
+                card.className = `goal-card ${theme.bg} ${theme.border} p-8 rounded-[3rem] flex flex-col shadow-sm`;
                 
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-6">
@@ -176,18 +179,18 @@
                                 <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-white ${theme.text} border border-slate-100 shadow-sm">${r[colNames.domain] || 'ICT'}</span>
                                 <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-900 text-white shadow-sm">${r[colNames.type] || 'G'}</span>
                             </div>
-                            <span class="text-[11px] font-bold text-slate-400 ml-1 tracking-wider uppercase italic">${r[colNames.grade] || ''}</span>
+                            <span class="text-[11px] font-bold text-slate-400 ml-1 tracking-wider uppercase italic">${r[colNames.grade] || 'Algemeen'}</span>
                         </div>
                         <div class="bg-white/80 px-3 py-1 rounded-xl border border-white shadow-sm">
-                            <span class="text-sm font-black ${theme.text} tracking-tight italic">${r[colNames.code] || 'N/A'}</span>
+                            <span class="text-sm font-black ${theme.text} tracking-tight italic">${r[colNames.code] || '#'}</span>
                         </div>
                     </div>
                     
                     <h3 class="text-slate-900 font-extrabold text-base leading-snug mb-4">
-                        ${r[colNames.sub] || 'Algemeen Doel'}
+                        ${r[colNames.sub] || 'Definitie / Doel'}
                     </h3>
 
-                    <div class="text-slate-600 text-sm leading-relaxed font-medium mb-8 bg-white/60 p-5 rounded-3xl border border-white/50 shadow-inner">
+                    <div class="text-slate-600 text-sm leading-relaxed font-medium mb-8 bg-white/60 p-5 rounded-3xl border border-white/50 shadow-inner overflow-hidden">
                         ${r.Leerplandoel || ''}
                     </div>
                     
@@ -198,11 +201,18 @@
                             <span class="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">Voorbeeld</span>
                             <div class="h-px bg-slate-200 flex-1"></div>
                         </div>
-                        <p class="text-slate-400 text-xs italic leading-relaxed px-2">"${r.Voorbeelden}"</p>
+                        <p class="text-slate-400 text-xs italic leading-relaxed px-2 text-center">"${r.Voorbeelden}"</p>
                     </div>` : ''}
                 `;
                 grid.appendChild(card);
             });
+        }
+
+        function updateGrade(g) {
+            filterGrade = g;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-all').classList.add('active');
+            render();
         }
 
         window.onload = init;
