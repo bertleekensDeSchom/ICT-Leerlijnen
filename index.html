@@ -3,224 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICT Doelen Dashboard - Kleurcodes</title>
+    <title>ICT Dashboard - Code Fixed</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .filter-btn.active { background-color: #1e293b; color: white; border-color: #1e293b; }
-        .loading-spinner { border-top-color: #3b82f6; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .goal-card { transition: all 0.25s ease; border-width: 2px; }
-        .goal-card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .filter-btn.active { background-color: #1e293b; color: white; border-color: #1e293b; transform: translateY(-2px); }
+        .goal-card { transition: all 0.3s ease; border-width: 2px; }
+        .goal-card:hover { transform: translateY(-5px); box-shadow: 0 25px 30px -10px rgba(0,0,0,0.1); }
     </style>
 </head>
-<body class="bg-[#f8fafc] min-h-screen pb-20">
+<body class="bg-[#f9fafb] min-h-screen pb-20">
 
-    <!-- Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 py-4 shadow-sm">
-        <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-blue-600 text-white p-2 rounded-xl">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                </div>
-                <h1 class="text-xl font-black text-slate-800 tracking-tight uppercase italic">ICT <span class="text-blue-600 italic">Doelenzoeker</span></h1>
-            </div>
-            <div id="connection-status" class="text-[10px] font-black px-4 py-1.5 rounded-full bg-slate-100 text-slate-400 uppercase tracking-[0.2em]">Verbinden...</div>
+    <header class="bg-white border-b border-slate-100 sticky top-0 z-50 py-5 shadow-sm">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">ICT <span class="text-blue-600 uppercase">Doelenzoeker</span></h1>
+            <div id="conn-status" class="text-[10px] font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-400 uppercase tracking-widest leading-none">Laden...</div>
         </div>
     </header>
 
-    <main class="container mx-auto px-4 mt-8">
+    <main class="container mx-auto px-4 mt-10">
         
-        <!-- Filter Paneel -->
-        <div id="ui-pane" class="hidden">
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200 mb-10">
-                <div class="mb-8">
-                    <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-1">Kies Leerjaar of Fase</label>
-                    <div id="grade-filters" class="flex flex-wrap gap-2">
-                        <button onclick="setGrade('all')" id="btn-all" class="filter-btn active px-6 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold transition-all hover:bg-slate-50">Alle doelen</button>
+        <div id="main-content" class="hidden">
+            <!-- Filter Dashboard -->
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 mb-10">
+                <div class="mb-10">
+                    <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4 block">Selecteer Leerjaar</label>
+                    <div id="grade-buttons" class="flex flex-wrap gap-2">
+                        <button onclick="updateGrade('all')" id="btn-all" class="filter-btn active px-6 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold transition-all">Alle</button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
-                    <div class="lg:col-span-1">
-                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Snel zoeken</label>
-                        <input type="text" id="search-input" onkeyup="render()" placeholder="Zoek op tekst of trefwoord..." class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-100 transition-all font-medium">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div>
+                        <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-3 block">Zoek op trefwoord</label>
+                        <input type="text" id="search-input" onkeyup="render()" placeholder="AI, muis, internet..." class="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none ring-2 ring-transparent focus:ring-blue-100 transition-all font-semibold">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Domein filter</label>
-                        <select id="domain-filter" onchange="render()" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold appearance-none cursor-pointer focus:ring-4 focus:ring-blue-100"></select>
+                        <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-3 block">Domein</label>
+                        <select id="domain-select" onchange="render()" class="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-blue-100"></select>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Doelsoort filter</label>
-                        <select id="type-filter" onchange="render()" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold appearance-none cursor-pointer focus:ring-4 focus:ring-blue-100">
-                            <option value="all">Alle soorten (G, MD, P, S)</option>
+                        <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-3 block">Doelsoort</label>
+                        <select id="type-select" onchange="render()" class="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-blue-100">
+                            <option value="all">Alle soorten</option>
                         </select>
                     </div>
                 </div>
             </div>
 
-            <div id="stats" class="mb-6 text-sm font-bold text-slate-400 px-4"></div>
-            <div id="goals-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
+            <div id="result-count" class="mb-8 text-xs font-bold text-slate-400 uppercase tracking-widest px-4"></div>
+            
+            <!-- Goals Grid -->
+            <div id="goals-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
 
         <!-- Loader -->
-        <div id="loader" class="flex flex-col items-center justify-center py-32 text-center">
-            <div class="loading-spinner w-14 h-14 border-4 border-slate-200 rounded-full mb-6"></div>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-xs">Live data ophalen uit Excel...</p>
+        <div id="loading-screen" class="flex flex-col items-center justify-center py-40">
+            <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-6"></div>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Data ophalen uit Excel...</p>
         </div>
     </main>
 
     <script>
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCFdDnFXhAe6lt-EzZ-VeHTg54dWNk-PuIDtYTN1hUd_yDxnhaUhdy1hQDx3QXjGtZIhmwUfIVe7az/pub?gid=1392774175&single=true&output=csv';
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCFdDnFXhAe6lt-EzZ-VeHTg54dWNk-PuIDtYTN1hUd_yDxnhaUhdy1hQDx3QXjGtZIhmwUfIVe7az/pub?gid=1392774175&single=true&output=csv';
         
-        let allData = [];
-        let activeGrade = 'all';
-        let cols = { grade: '', domain: '', type: '', code: '' };
+        let dataRows = [];
+        let filterGrade = 'all';
+        let colNames = { grade: '', domain: '', type: '', code: '', sub: '' };
 
         async function init() {
             try {
-                const response = await fetch(CSV_URL);
-                const csvText = await response.text();
-                Papa.parse(csvText, {
+                const response = await fetch(SHEET_URL);
+                const csv = await response.text();
+                Papa.parse(csv, {
                     header: true,
                     skipEmptyLines: true,
-                    complete: function(results) {
-                        allData = results.data;
-                        mapColumns(results.meta.fields);
+                    complete: (results) => {
+                        dataRows = results.data;
+                        identifyColumns(results.meta.fields);
                         setupUI();
                     }
                 });
-            } catch (err) {
-                document.getElementById('connection-status').innerText = "FOUT: Geen verbinding";
-                document.getElementById('connection-status').classList.add('bg-red-500', 'text-white');
+            } catch (e) {
+                console.error("Laden mislukt", e);
             }
         }
 
-        function mapColumns(fields) {
-            fields.forEach(f => {
-                const l = f.toLowerCase();
-                if (l.includes('jaar') || l.includes('fase')) cols.grade = f;
-                if (l.includes('domein')) cols.domain = f;
-                if (l.includes('soort')) cols.type = f;
-                if (l.includes('code')) cols.code = f;
+        function identifyColumns(headers) {
+            headers.forEach(h => {
+                const lower = h.toLowerCase().trim();
+                // Specifieke matching om de juiste "Code" kolom te pakken
+                if (lower === 'code') colNames.code = h;
+                if (lower.includes('jaar') || lower.includes('fase')) colNames.grade = h;
+                if (lower === 'domein') colNames.domain = h;
+                if (lower === 'soort') colNames.type = h;
+                if (lower.includes('subdomein')) colNames.sub = h;
             });
+            // Fallback als exacte match niet werkt
+            if (!colNames.code) colNames.code = headers.find(h => h.toLowerCase().includes('code'));
         }
 
-        function getDomeinStyle(domein) {
+        function getTheme(domein) {
             const d = (domein || "").toLowerCase();
-            if (d.includes("computationeel")) return { bg: "bg-purple-50", border: "border-purple-200", text: "text-purple-700", dark: "bg-purple-600" };
-            if (d.includes("informatieveiligheid")) return { bg: "bg-rose-50", border: "border-rose-200", text: "text-rose-700", dark: "bg-rose-600" };
-            if (d.includes("mediawijsheid")) return { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-700", dark: "bg-amber-600" };
-            if (d.includes("creatie")) return { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-700", dark: "bg-emerald-600" };
-            if (d.includes("geletterdheid")) return { bg: "bg-sky-50", border: "border-sky-200", text: "text-sky-700", dark: "bg-sky-600" };
-            return { bg: "bg-slate-50", border: "border-slate-200", text: "text-slate-700", dark: "bg-slate-600" };
+            if (d.includes("computationeel")) return { bg: "bg-indigo-50/70", border: "border-indigo-100", text: "text-indigo-700", badge: "bg-indigo-600" };
+            if (d.includes("veiligheid")) return { bg: "bg-rose-50/70", border: "border-rose-100", text: "text-rose-700", badge: "bg-rose-600" };
+            if (d.includes("mediawijsheid")) return { bg: "bg-amber-50/70", border: "border-amber-100", text: "text-amber-700", badge: "bg-amber-600" };
+            if (d.includes("creatie")) return { bg: "bg-emerald-50/70", border: "border-emerald-100", text: "text-emerald-700", badge: "bg-emerald-600" };
+            return { bg: "bg-blue-50/70", border: "border-blue-100", text: "text-blue-700", badge: "bg-blue-600" };
         }
 
         function setupUI() {
-            document.getElementById('loader').classList.add('hidden');
-            document.getElementById('ui-pane').classList.remove('hidden');
-            document.getElementById('connection-status').innerText = "EXCEL LIVE";
-            document.getElementById('connection-status').classList.replace('bg-slate-100', 'bg-green-500');
-            document.getElementById('connection-status').classList.replace('text-slate-400', 'text-white');
+            document.getElementById('loading-screen').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            document.getElementById('conn-status').innerText = "Excel Verbonden";
+            document.getElementById('conn-status').className = "text-[10px] font-bold px-3 py-1 rounded-full bg-green-500 text-white uppercase tracking-widest";
 
-            const grades = [...new Set(allData.map(d => d[cols.grade]))].filter(Boolean).sort();
-            const gradeContainer = document.getElementById('grade-filters');
+            const grades = [...new Set(dataRows.map(r => r[colNames.grade]))].filter(Boolean).sort();
+            const gCont = document.getElementById('grade-buttons');
             grades.forEach(g => {
                 const btn = document.createElement('button');
-                btn.className = "filter-btn px-6 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold transition-all shadow-sm hover:bg-slate-50";
+                btn.className = "filter-btn px-6 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold transition-all hover:bg-slate-50";
                 btn.innerText = g;
                 btn.onclick = () => {
-                    activeGrade = g;
+                    filterGrade = g;
                     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     render();
                 };
-                gradeContainer.appendChild(btn);
+                gCont.appendChild(btn);
             });
 
-            const domains = [...new Set(allData.map(d => d[cols.domain]))].filter(Boolean).sort();
-            const domSel = document.getElementById('domain-filter');
-            domSel.innerHTML = '<option value="all">Alle domeinen</option>';
-            domains.forEach(d => {
-                const opt = document.createElement('option');
-                opt.value = d; opt.innerText = d;
-                domSel.appendChild(opt);
-            });
+            const domains = [...new Set(dataRows.map(r => r[colNames.domain]))].filter(Boolean).sort();
+            const dSel = document.getElementById('domain-select');
+            dSel.innerHTML = '<option value="all">Alle domeinen</option>';
+            domains.forEach(d => dSel.innerHTML += `<option value="${d}">${d}</option>`);
 
-            const types = [...new Set(allData.map(d => d[cols.type]))].filter(Boolean).sort();
-            const typeSel = document.getElementById('type-filter');
-            types.forEach(t => {
-                const opt = document.createElement('option');
-                opt.value = t; opt.innerText = `Soort: ${t}`;
-                typeSel.appendChild(opt);
-            });
+            const types = [...new Set(dataRows.map(r => r[colNames.type]))].filter(Boolean).sort();
+            const tSel = document.getElementById('type-select');
+            types.forEach(t => tSel.innerHTML += `<option value="${t}">${t}</option>`);
 
             render();
         }
 
         function render() {
-            const container = document.getElementById('goals-container');
             const search = document.getElementById('search-input').value.toLowerCase();
-            const domainF = document.getElementById('domain-filter').value;
-            const typeF = document.getElementById('type-filter').value;
+            const domF = document.getElementById('domain-select').value;
+            const typF = document.getElementById('type-select').value;
+            const grid = document.getElementById('goals-grid');
             
-            const filtered = allData.filter(item => {
-                const mGrade = activeGrade === 'all' || item[cols.grade] === activeGrade;
-                const mDomain = domainF === 'all' || item[cols.domain] === domainF;
-                const mType = typeF === 'all' || item[cols.type] === typeF;
-                const mSearch = (item.Leerplandoel || "").toLowerCase().includes(search) || (item.Voorbeelden || "").toLowerCase().includes(search);
-                return mGrade && mDomain && mType && mSearch;
+            const filtered = dataRows.filter(r => {
+                const mG = filterGrade === 'all' || r[colNames.grade] === filterGrade;
+                const mD = domF === 'all' || r[colNames.domain] === domF;
+                const mT = typF === 'all' || r[colNames.type] === typF;
+                const mS = (r.Leerplandoel || "").toLowerCase().includes(search) || (r.Voorbeelden || "").toLowerCase().includes(search);
+                return mG && mD && mT && mS;
             });
 
-            document.getElementById('stats').innerText = `${filtered.length} doelen gevonden voor jouw selectie`;
-            container.innerHTML = '';
+            document.getElementById('result-count').innerText = `${filtered.length} leerplandoelen gevonden`;
+            grid.innerHTML = '';
 
-            filtered.forEach(item => {
-                const style = getDomeinStyle(item[cols.domain]);
+            filtered.forEach(r => {
+                const theme = getTheme(r[colNames.domain]);
                 const card = document.createElement('div');
-                card.className = `goal-card ${style.bg} ${style.border} p-7 rounded-[2.5rem] flex flex-col`;
+                card.className = `goal-card ${theme.bg} ${theme.border} p-8 rounded-[3rem] flex flex-col`;
                 
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-6">
                         <div class="flex flex-col gap-2">
-                             <div class="flex items-center gap-2">
-                                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-white ${style.text} shadow-sm border border-inherit">
-                                    ${item[cols.domain] || 'Algemeen'}
-                                </span>
-                                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-800 text-white shadow-sm">
-                                    ${item[cols.type] || 'G'}
-                                </span>
+                            <div class="flex gap-2">
+                                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-white ${theme.text} border border-slate-100 shadow-sm">${r[colNames.domain] || 'ICT'}</span>
+                                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-900 text-white shadow-sm">${r[colNames.type] || 'G'}</span>
                             </div>
-                            <span class="text-xs font-black ${style.text} mt-1 opacity-70">${item[cols.grade] || ''}</span>
+                            <span class="text-[11px] font-bold text-slate-400 ml-1 tracking-wider uppercase italic">${r[colNames.grade] || ''}</span>
                         </div>
-                        <div class="text-right">
-                            <span class="text-lg font-black ${style.text} tracking-tighter block leading-none">#${item[cols.code] || '??'}</span>
+                        <div class="bg-white/80 px-3 py-1 rounded-xl border border-white shadow-sm">
+                            <span class="text-sm font-black ${theme.text} tracking-tight italic">${r[colNames.code] || 'N/A'}</span>
                         </div>
                     </div>
                     
-                    <h3 class="text-slate-800 font-black text-lg leading-tight mb-4 min-h-[3rem]">
-                        ${item.Subdomein || 'Leerplandoel'}
+                    <h3 class="text-slate-900 font-extrabold text-base leading-snug mb-4">
+                        ${r[colNames.sub] || 'Algemeen Doel'}
                     </h3>
 
-                    <div class="text-slate-700 text-sm leading-relaxed font-medium mb-8 bg-white/50 p-4 rounded-2xl border border-white/60 shadow-inner">
-                        ${item.Leerplandoel || ''}
+                    <div class="text-slate-600 text-sm leading-relaxed font-medium mb-8 bg-white/60 p-5 rounded-3xl border border-white/50 shadow-inner">
+                        ${r.Leerplandoel || ''}
                     </div>
                     
-                    ${item.Voorbeelden ? `
+                    ${r.Voorbeelden ? `
                     <div class="mt-auto">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="h-px flex-1 bg-slate-200"></span>
-                            <span class="text-[9px] font-black uppercase text-slate-400 tracking-widest">Praktijkvoorbeeld</span>
-                            <span class="h-px flex-1 bg-slate-200"></span>
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="h-px bg-slate-200 flex-1"></div>
+                            <span class="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">Voorbeeld</span>
+                            <div class="h-px bg-slate-200 flex-1"></div>
                         </div>
-                        <p class="text-slate-500 text-xs italic leading-snug px-2 text-center">"${item.Voorbeelden}"</p>
+                        <p class="text-slate-400 text-xs italic leading-relaxed px-2">"${r.Voorbeelden}"</p>
                     </div>` : ''}
                 `;
-                container.appendChild(card);
+                grid.appendChild(card);
             });
         }
 
