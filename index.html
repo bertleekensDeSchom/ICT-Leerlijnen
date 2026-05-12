@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICT Dashboard - Interactief & Leesbaar</title>
+    <title>ICT Dashboard - Compact & Leesbaar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -33,7 +33,7 @@
                 <!-- Jaar/Fase Selectie en Toggle Legende -->
                 <div class="mb-6">
                     <div class="flex justify-between items-end mb-4">
-                        <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] block underline decoration-blue-200 decoration-2 underline-offset-4 italic">Selecteer Jaar / Fase</label>
+                        <label class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] block underline decoration-blue-200 decoration-2 underline-offset-4 italic text-sm md:text-base">Selecteer Jaar / Fase</label>
                         <button onclick="toggleLegend()" class="text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-xl hover:bg-blue-100 transition-colors flex items-center gap-2">
                             <span id="legend-icon">ℹ️</span> <span id="legend-text">Toon info over de fasen</span>
                         </button>
@@ -247,12 +247,14 @@
                         ${r[colNames.sub] || 'Doelstelling'}
                     </h3>
 
-                    <div class="text-slate-700 text-[14px] leading-relaxed font-medium mb-8 bg-white/60 p-5 rounded-3xl border border-white/50 shadow-inner">
+                    <!-- LEERPLANDOEL -->
+                    <div class="text-slate-700 text-[14px] leading-relaxed font-medium mb-3 bg-white/60 p-5 rounded-3xl border border-white/50 shadow-inner">
                         ${r.Leerplandoel || ''}
                     </div>
                     
+                    <!-- PRAKTIJKVOORBEELD -->
                     ${r.Voorbeelden ? `
-                    <div class="mt-auto bg-white/40 p-4 rounded-2xl border border-white/40 shadow-sm">
+                    <div class="bg-white/40 p-4 rounded-2xl border border-white/40 shadow-sm mt-1">
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Praktijkvoorbeeld</span>
                             <div class="h-px bg-slate-200 flex-1 opacity-50"></div>
