@@ -24,9 +24,9 @@
         <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-2xl md:text-4xl font-extrabold tracking-tighter uppercase leading-none italic text-blue-500">ICT-LEERPLANDOELEN</h1>
-                <p class="text-slate-400 mt-1 font-medium tracking-widest text-[10px] uppercase opacity-80 font-mono">Dashboard & Debug Tool</p>
+                <p class="text-slate-400 mt-1 font-medium tracking-widest text-[10px] uppercase opacity-80 font-mono italic">Interactief Leerplanoverzicht</p>
             </div>
-            <div id="conn-status" class="text-[10px] font-black px-4 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 uppercase tracking-[0.15em] transition-all duration-500">Status: Laden...</div>
+            <div id="conn-status" class="text-[10px] font-black px-4 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 uppercase tracking-[0.15em] transition-all">Status: Laden...</div>
         </div>
     </header>
 
@@ -39,46 +39,52 @@
                     <span id="filter-chevron" class="text-slate-400 font-black text-2xl">−</span>
                 </div>
                 
-                <div id="filter-pane-content" class="px-6 md:px-10 pb-8 pt-4 space-y-4">
+                <div id="filter-pane-content" class="px-6 md:px-10 pb-8 pt-4 space-y-4 text-left">
                     <div class="mt-4 pt-2">
                          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                            <div class="md:col-span-1 text-left">
-                                <label class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1.5 block italic text-left">1. Discipline</label>
-                                <select id="discipline-selector" onchange="changeDiscipline(this.value)" class="w-full p-3 bg-blue-50 border-none rounded-xl ring-1 ring-blue-200 font-black appearance-none cursor-pointer text-[12px] text-blue-700 focus:ring-2 focus:ring-blue-500 text-left"></select>
+                            <div class="md:col-span-1">
+                                <label class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1.5 block italic">1. Discipline</label>
+                                <select id="discipline-selector" onchange="changeDiscipline(this.value)" class="w-full p-3 bg-blue-50 border-none rounded-xl ring-1 ring-blue-200 font-black appearance-none cursor-pointer text-[12px] text-blue-700 focus:ring-2 focus:ring-blue-500"></select>
                             </div>
-                            <div class="md:col-span-3 text-left">
-                                <div class="flex justify-between items-center mb-1.5 text-left">
+                            <div class="md:col-span-3">
+                                <div class="flex justify-between items-center mb-1.5">
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">2. Jaar of fase</label>
                                     <button onclick="toggleLegend()" class="text-[9px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg border border-blue-100 hover:bg-blue-100 transition-all font-black uppercase">ℹ️ Info fasen</button>
                                 </div>
-                                <div id="grade-buttons" class="flex flex-wrap gap-2 text-left"></div>
+                                <div id="grade-buttons" class="flex flex-wrap gap-2"></div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t border-slate-100 text-left">
-                        <input type="text" id="search-input" onkeyup="render()" placeholder="Zoek op tekst..." class="w-full p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 font-semibold text-slate-700 text-[12px]">
-                        <select id="domain-select" onchange="render()" class="w-full p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 font-bold text-[12px] text-slate-700"></select>
-                        <select id="subdomain-select" onchange="render()" class="w-full p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 font-bold text-[12px] text-slate-700"><option value="all">Alle Subdomeinen</option></select>
-                        <select id="cluster-select" onchange="render()" class="w-full p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 font-bold text-[12px] text-slate-700"><option value="all">Alle Clusters</option></select>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t border-slate-100">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block italic">Zoek op tekst</label>
+                            <input type="text" id="search-input" onkeyup="render()" placeholder="Typ trefwoord..." class="w-full p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 font-semibold text-slate-700 text-[12px]">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block italic">Domein</label>
+                            <select id="domain-select" onchange="handleDomainChange()" class="w-full p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 font-bold appearance-none cursor-pointer text-[12px] text-slate-700"></select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block italic">Subdomein</label>
+                            <select id="subdomain-select" onchange="handleSubdomainChange()" class="w-full p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 font-bold appearance-none cursor-pointer text-[12px] text-slate-700"></select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block italic">Cluster</label>
+                            <select id="cluster-select" onchange="render()" class="w-full p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 font-bold appearance-none cursor-pointer text-[12px] text-slate-700"></select>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div id="result-count" class="mb-6 px-4 text-xs font-bold text-slate-400 uppercase tracking-widest italic font-mono text-left"></div>
+            <div id="result-count" class="mb-6 px-4 text-xs font-bold text-slate-400 uppercase tracking-widest italic font-mono"></div>
             <div id="goals-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-24 text-left"></div>
         </div>
 
-        <!-- Loader & Debug -->
-        <div id="loading-screen" class="flex flex-col items-center justify-center py-40 text-center no-print">
+        <!-- Loader -->
+        <div id="loading-screen" class="flex flex-col items-center justify-center py-40 text-center">
             <div class="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4 shadow-sm"></div>
             <p id="loading-text" class="text-slate-400 font-bold uppercase tracking-widest text-[10px] animate-pulse font-black italic">Database laden (0/5)...</p>
-            
-            <div id="debug-panel" class="hidden mt-10 max-w-2xl w-full bg-red-50 border border-red-200 rounded-3xl p-6 text-left">
-                <h3 class="text-red-600 font-black uppercase text-xs mb-3 tracking-widest">❌ Foutopsporing (Debug)</h3>
-                <div id="debug-content" class="text-[11px] font-mono text-red-800 space-y-2 whitespace-pre-wrap"></div>
-                <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase">Pagina herladen</button>
-            </div>
         </div>
     </main>
 
@@ -105,94 +111,90 @@
         let activeDiscipline = DISCIPLINES[0];
         let filterGrade = localStorage.getItem('preferredGrade') || 'all';
 
-        function logDebug(msg) {
-            const panel = document.getElementById('debug-panel');
-            const content = document.getElementById('debug-content');
-            panel.classList.remove('hidden');
-            content.innerText += msg + "\n";
-        }
-
         async function init() {
             let loadedCount = 0;
+            const total = DISCIPLINES.length;
             const fetchPromises = DISCIPLINES.map(async (disc) => {
                 try {
                     const response = await fetch(BASE_URL + disc.gid);
-                    if (!response.ok) throw new Error(`Kan tabblad ${disc.name} niet ophalen.`);
                     const csv = await response.text();
-                    
                     return new Promise((resolve) => {
                         Papa.parse(csv, {
                             header: true, skipEmptyLines: true,
                             complete: (results) => {
-                                let cols = mapHeaders(results.meta.fields, disc.name);
+                                let cols = { code:'', grade:'', domain:'', type:'', sub:'', cluster:'', goal:'', example:'', vocab:'' };
+                                results.meta.fields.forEach(h => {
+                                    const l = h.toLowerCase().trim();
+                                    if (l === 'code') cols.code = h;
+                                    else if (l.includes('jaar') || l.includes('fase')) cols.grade = h;
+                                    else if (l === 'soort' || l.includes('doel soort')) cols.type = h;
+                                    else if (l.includes('subdomein')) cols.sub = h;
+                                    else if (l.includes('cluster')) cols.cluster = h;
+                                    else if (l.includes('leerplandoel')) cols.goal = h;
+                                    else if (l.includes('voorbeeld')) cols.example = h;
+                                    else if (l.includes('woordenschat')) cols.vocab = h;
+                                    else if (l.includes('domein') && !l.includes('sub')) cols.domain = h;
+                                });
                                 dataCache[disc.name] = { rows: results.data, cols: cols };
                                 loadedCount++;
-                                document.getElementById('loading-text').innerText = `Database laden (${loadedCount}/${DISCIPLINES.length})...`;
+                                document.getElementById('loading-text').innerText = `Database laden (${loadedCount}/${total})...`;
                                 resolve();
                             }
                         });
                     });
-                } catch (e) {
-                    logDebug(`Fout bij discipline ${disc.name}: ${e.message}`);
-                    return null;
-                }
+                } catch (e) { console.error(e); }
             });
 
             await Promise.all(fetchPromises);
+            fillSelector();
+            showDiscipline(activeDiscipline.name);
+            document.getElementById('loading-screen').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            updateStatusBadge('live');
+        }
+
+        // --- FILTER LOGICA (Dependent Dropdowns) ---
+
+        function handleDomainChange() {
+            const currentData = dataCache[activeDiscipline.name];
+            const cols = currentData.cols;
+            const domVal = document.getElementById('domain-select').value;
             
-            try {
-                fillSelector();
-                showDiscipline(activeDiscipline.name);
-                document.getElementById('loading-screen').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-                updateStatusBadge('live');
-            } catch (err) {
-                logDebug(`CRITICAL UI ERROR: ${err.message}`);
-                console.error(err);
+            // Filter de subdomeinen op basis van het gekozen domein
+            let rows = currentData.rows;
+            if (domVal !== 'all') {
+                rows = rows.filter(r => r[cols.domain] === domVal);
             }
+
+            fillDropdown('subdomain-select', cols.sub, 'Alle Subdomeinen', rows);
+            // Reset de cluster ook
+            document.getElementById('subdomain-select').value = 'all';
+            handleSubdomainChange(); 
         }
 
-        function mapHeaders(fields, discName) {
-            let cols = { code:null, grade:null, domain:null, type:null, sub:null, cluster:null, goal:null, example:null, vocab:null };
-            if (!fields) return cols;
+        function handleSubdomainChange() {
+            const currentData = dataCache[activeDiscipline.name];
+            const cols = currentData.cols;
+            const domVal = document.getElementById('domain-select').value;
+            const subVal = document.getElementById('subdomain-select').value;
+            
+            // Filter de clusters op basis van domein EN subdomein
+            let rows = currentData.rows;
+            if (domVal !== 'all') rows = rows.filter(r => r[cols.domain] === domVal);
+            if (subVal !== 'all') rows = rows.filter(r => r[cols.sub] === subVal);
 
-            fields.forEach(h => {
-                const l = h.toLowerCase().trim();
-                if (l === 'code') cols.code = h;
-                else if (l.includes('jaar') || l.includes('fase')) cols.grade = h;
-                else if (l === 'soort' || l.includes('doel soort')) cols.type = h;
-                else if (l.includes('subdomein')) cols.sub = h;
-                else if (l.includes('cluster')) cols.cluster = h;
-                else if (l.includes('leerplandoel')) cols.goal = h;
-                else if (l.includes('voorbeeld')) cols.example = h;
-                else if (l.includes('woordenschat')) cols.vocab = h;
-                else if (l.includes('domein') && !l.includes('sub')) cols.domain = h;
-            });
-
-            // Controle of essentiële kolommen missen
-            if (!cols.grade) logDebug(`⚠️ Tabblad [${discName}]: Kolom 'Jaar/Fase' niet gevonden!`);
-            if (!cols.goal) logDebug(`⚠️ Tabblad [${discName}]: Kolom 'Leerplandoel' niet gevonden!`);
-
-            return cols;
+            fillDropdown('cluster-select', cols.cluster, 'Alle Clusters', rows);
+            document.getElementById('cluster-select').value = 'all';
+            render();
         }
 
-        function fillSelector() {
-            const sel = document.getElementById('discipline-selector');
-            if(!sel) return;
-            sel.innerHTML = DISCIPLINES.filter(d => dataCache[d.name]).map(d => `<option value="${d.name}">${d.name}</option>`).join('');
-        }
-
-        function showDiscipline(name) {
-            const data = dataCache[name];
-            if(!data) return;
-            activeDiscipline = DISCIPLINES.find(d => d.name === name);
-            document.getElementById('active-discipline-header').innerText = activeDiscipline.name;
-            setupFilters(data);
-        }
-
-        function changeDiscipline(name) {
-            filterGrade = 'all';
-            showDiscipline(name);
+        function fillDropdown(id, key, defaultText, rows) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (!key) { el.classList.add('hidden'); return; }
+            el.classList.remove('hidden');
+            const items = [...new Set(rows.map(r => r[key]))].filter(Boolean).sort();
+            el.innerHTML = `<option value="all">${defaultText}</option>` + items.map(i => `<option value="${i}">${i}</option>`).join('');
         }
 
         function setupFilters(data) {
@@ -219,6 +221,7 @@
                 gCont.appendChild(btn);
             });
 
+            // Initiele vulling van alle dropdowns
             fillDropdown('domain-select', cols.domain, 'Alle Domeinen', data.rows);
             fillDropdown('subdomain-select', cols.sub, 'Alle Subdomeinen', data.rows);
             fillDropdown('cluster-select', cols.cluster, 'Alle Clusters', data.rows);
@@ -231,85 +234,75 @@
             render();
         }
 
-        function fillDropdown(id, key, defaultText, rows) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            if (!key) { el.classList.add('hidden'); return; }
-            el.classList.remove('hidden');
-            const items = [...new Set(rows.map(r => r[key]))].filter(Boolean).sort();
-            el.innerHTML = `<option value="all">${defaultText}</option>` + items.map(i => `<option value="${i}">${i}</option>`).join('');
-        }
+        // --- CORE RENDER EN UI ---
 
         function render() {
-            try {
-                const currentData = dataCache[activeDiscipline.name];
-                if(!currentData) return;
-                const cols = currentData.cols;
+            const currentData = dataCache[activeDiscipline.name];
+            if(!currentData) return;
+            const cols = currentData.cols;
+            const query = document.getElementById('search-input')?.value?.toLowerCase() || "";
+            const domF = document.getElementById('domain-select')?.value || "all";
+            const subdomF = document.getElementById('subdomain-select')?.value || "all";
+            const clusterF = document.getElementById('cluster-select')?.value || "all";
+            const typeF = document.getElementById('type-select')?.value || "all";
+            const grid = document.getElementById('goals-grid');
 
-                // --- VEILIG WAARDEN LEZEN ---
-                const query = document.getElementById('search-input')?.value?.toLowerCase() || "";
-                const domF = document.getElementById('domain-select')?.value || "all";
-                const subdomF = document.getElementById('subdomain-select')?.value || "all";
-                const clusterF = document.getElementById('cluster-select')?.value || "all";
-                const typeF = document.getElementById('type-select')?.value || "all";
-                const grid = document.getElementById('goals-grid');
+            const filtered = currentData.rows.filter(r => {
+                const rawGrade = (r[cols.grade] || "").trim();
+                const mappedGrade = gradeMapping[rawGrade] || rawGrade || "Extra / Algemeen";
+                return (filterGrade === 'all' || mappedGrade === filterGrade) && 
+                       (domF === 'all' || r[cols.domain] === domF) && 
+                       (subdomF === 'all' || r[cols.sub] === subdomF) && 
+                       (clusterF === 'all' || r[cols.cluster] === clusterF) && 
+                       (typeF === 'all' || r[cols.type] === typeF) &&
+                       ((r[cols.goal] || "").toLowerCase().includes(query) || (r[cols.example] || "").toLowerCase().includes(query) || (r[cols.sub] || "").toLowerCase().includes(query));
+            });
 
-                const filtered = currentData.rows.filter(r => {
-                    const rawGrade = (r[cols.grade] || "").trim();
-                    const mappedGrade = gradeMapping[rawGrade] || rawGrade || "Extra / Algemeen";
-                    const matchesGrade = (filterGrade === 'all' || mappedGrade === filterGrade);
-                    const matchesDomain = (domF === 'all' || r[cols.domain] === domF);
-                    const matchesSub = (subdomF === 'all' || r[cols.sub] === subdomF);
-                    const matchesCluster = (clusterF === 'all' || r[cols.cluster] === clusterF);
-                    const matchesType = (typeF === 'all' || r[cols.type] === typeF);
-                    const matchesSearch = ((r[cols.goal] || "").toLowerCase().includes(query) || (r[cols.example] || "").toLowerCase().includes(query) || (r[cols.sub] || "").toLowerCase().includes(query));
-                    
-                    return matchesGrade && matchesDomain && matchesSub && matchesCluster && matchesType && matchesSearch;
-                });
-
-                if(document.getElementById('result-count')) document.getElementById('result-count').innerText = `${filtered.length} DOELEN GEVONDEN`;
-                if(!grid) return;
-
-                grid.innerHTML = filtered.map((r, idx) => {
-                    const theme = getTheme(r[cols.domain]);
-                    const mappedGrade = gradeMapping[(r[cols.grade] || "").trim()] || r[cols.grade] || 'Algemeen';
-                    return `
-                        <div class="goal-card ${theme.bg} ${theme.border} p-5 md:p-6 rounded-[2.5rem] flex flex-col shadow-sm border-2 text-left">
-                            <div class="flex justify-between items-start mb-4 text-[9px]">
-                                <div class="flex flex-col gap-1">
-                                    <div class="flex gap-1.5"><span class="px-2 py-0.5 rounded-full font-black uppercase bg-white ${theme.text} border border-slate-100 shadow-sm text-[8px]">${r[cols.domain] || 'ALGEMEEN'}</span><span class="px-2 py-0.5 rounded-full font-black uppercase bg-slate-900 text-white shadow-sm text-[8px]">${r[cols.type] || 'G'}</span></div>
-                                    <span class="font-bold text-slate-400 ml-1 tracking-wider uppercase italic">${mappedGrade}</span>
-                                </div>
-                                <div class="bg-white/90 px-3 py-1 rounded-lg border border-white shadow-sm font-black ${theme.text} italic text-xs leading-none">#${r[cols.code] || ''}</div>
+            document.getElementById('result-count').innerText = `${filtered.length} DOELEN GEVONDEN`;
+            grid.innerHTML = filtered.map((r, idx) => {
+                const theme = getTheme(r[cols.domain]);
+                const mappedGrade = gradeMapping[(r[cols.grade] || "").trim()] || r[cols.grade] || 'Algemeen';
+                return `
+                    <div class="goal-card ${theme.bg} ${theme.border} p-5 md:p-6 rounded-[2.5rem] flex flex-col shadow-sm border-2 text-left">
+                        <div class="flex justify-between items-start mb-4 text-[9px]">
+                            <div class="flex flex-col gap-1 text-left">
+                                <div class="flex gap-1.5 text-left"><span class="px-2 py-0.5 rounded-full font-black uppercase bg-white ${theme.text} border border-slate-100 shadow-sm text-[8px]">${r[cols.domain] || 'ALGEMEEN'}</span><span class="px-2 py-0.5 rounded-full font-black uppercase bg-slate-900 text-white shadow-sm text-[8px]">${r[cols.type] || 'G'}</span></div>
+                                <span class="font-bold text-slate-400 ml-1 tracking-wider uppercase italic">${mappedGrade}</span>
                             </div>
-                            <h3 class="text-slate-900 font-extrabold text-[13px] md:text-sm leading-snug mb-3 uppercase tracking-tight">${r[cols.sub] || ''}</h3>
-                            <div class="text-slate-700 text-[12px] leading-relaxed font-semibold bg-white/70 p-4 rounded-[1.8rem] border border-white/50 shadow-inner mb-3">${r[cols.goal] || ''}</div>
-                            ${r[cols.vocab] ? `<div class="flex items-start gap-1.5 px-3 mb-3 opacity-80"><span class="text-[9px] mt-0.5">🏷️</span><p class="text-[10px] font-bold text-slate-500 italic leading-tight">${r[cols.vocab]}</p></div>` : ''}
-                            <div class="mt-auto space-y-2">
-                                <button onclick="addToSelection('${activeDiscipline.name}', ${currentData.rows.indexOf(r)})" class="w-full py-2.5 rounded-xl bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-md">➕ Toevoegen aan lesfiche</button>
-                                ${r[cols.example] ? `
-                                    <div id="ex-${idx}" class="hidden bg-white/50 p-4 rounded-xl border border-white shadow-sm mb-2 text-slate-600 italic text-[11px]">"${r[cols.example]}"</div>
-                                    <button id="btn-ex-${idx}" onclick="toggleExample(${idx})" class="w-full py-2.5 rounded-xl bg-white/60 text-slate-600 text-[8px] font-black uppercase hover:bg-white transition-all border border-white/50">Toon praktijkvoorbeeld 💡</button>
-                                ` : ''}
-                            </div>
-                        </div>`;
-                }).join('');
-            } catch (err) {
-                logDebug(`RENDER ERROR: ${err.message}`);
-            }
+                            <div class="bg-white/90 px-3 py-1 rounded-lg border border-white shadow-sm font-black ${theme.text} italic text-xs leading-none">#${r[cols.code] || ''}</div>
+                        </div>
+                        <h3 class="text-slate-900 font-extrabold text-[13px] md:text-sm leading-snug mb-3 uppercase tracking-tight">${r[cols.sub] || ''}</h3>
+                        <div class="text-slate-700 text-[12px] leading-relaxed font-semibold bg-white/70 p-4 rounded-[1.8rem] border border-white/50 shadow-inner mb-3">${r[cols.goal] || ''}</div>
+                        <div class="mt-auto">
+                            ${r[cols.example] ? `
+                                <div id="ex-${idx}" class="hidden bg-white/50 p-4 rounded-xl border border-white shadow-sm mb-2 text-slate-600 italic text-[11px]">"${r[cols.example]}"</div>
+                                <button id="btn-ex-${idx}" onclick="toggleExample(${idx})" class="w-full py-2.5 rounded-xl bg-white/60 text-slate-600 text-[8px] font-black uppercase hover:bg-white border border-white/50 transition-all">Toon praktijkvoorbeeld 💡</button>
+                            ` : ''}
+                        </div>
+                    </div>`;
+            }).join('');
         }
 
         function toggleExample(id) {
             const content = document.getElementById(`ex-${id}`);
             const btn = document.getElementById(`btn-ex-${id}`);
-            if(!content || !btn) return;
             const isHidden = content.classList.contains('hidden');
             content.classList.toggle('hidden');
             btn.innerText = isHidden ? "Verberg voorbeeld 🔼" : "Toon praktijkvoorbeeld 💡";
             btn.classList.toggle('bg-slate-800', isHidden); btn.classList.toggle('text-white', isHidden);
         }
 
-        function toggleFilterPane() { const c = document.getElementById('filter-pane-content'); c?.classList.toggle('hidden'); document.getElementById('filter-chevron').innerText = c?.classList.contains('hidden') ? "+" : "−"; }
+        function showDiscipline(name) {
+            const data = dataCache[name];
+            if(!data) return;
+            activeDiscipline = DISCIPLINES.find(d => d.name === name);
+            document.getElementById('active-discipline-header').innerText = activeDiscipline.name;
+            setupFilters(data);
+        }
+
+        function changeDiscipline(name) { filterGrade = 'all'; showDiscipline(name); }
+        function fillSelector() { document.getElementById('discipline-selector').innerHTML = DISCIPLINES.map(d => `<option value="${d.name}">${d.name}</option>`).join(''); }
+        function toggleFilterPane() { document.getElementById('filter-pane-content')?.classList.toggle('hidden'); document.getElementById('filter-chevron').innerText = document.getElementById('filter-pane-content')?.classList.contains('hidden') ? "+" : "−"; }
         function toggleLegend() { document.getElementById('legend-container')?.classList.toggle('hidden'); }
         function updateStatusBadge(s) { const el = document.getElementById('conn-status'); if(el) { el.innerText = s === 'live' ? "Status: Live" : "Status: Laden..."; el.className = `text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest ${s === 'live' ? 'bg-green-600 text-white shadow-md' : 'bg-slate-800 text-slate-400'}`; } }
 
