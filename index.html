@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Leerplandoelen</title>
+    <title>ICT-Leerplandoelen Dashboard</title>
     <!-- Externe Bibliotheken -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --brand-color: #1e293b; --brand-text: #ffffff; }
+        :root { --brand-color: #2563eb; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; transition: background 0.5s ease; }
         
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.4); }
@@ -26,22 +26,36 @@
         
         .list-row { border-bottom: 1px solid #f1f5f9; transition: all 0.2s; background: white; }
         .list-row:hover { background: #f8fafc; }
-        .list-row.expanded { background: #ffffff; border-left: 6px solid var(--brand-color); box-shadow: inset 0 0 15px rgba(0,0,0,0.02); }
+        .list-row.expanded { border-left: 6px solid var(--brand-color); }
 
         .add-btn { background-color: var(--brand-color); transition: all 0.2s; }
-        .add-btn:hover { transform: scale(1.15); filter: brightness(1.1); }
-        .add-btn:active { transform: scale(0.95); }
+        .add-btn:hover { transform: scale(1.1); filter: brightness(1.1); }
 
-        @media print { .no-print { display: none !important; } #print-area { display: block !important; width: 100%; } body { background: white !important; } }
+        /* --- VERBETERDE PRINT LOGICA --- */
+        @media print {
+            body { background: white !important; padding: 0 !important; margin: 0 !important; }
+            header, main, #selection-drawer, #conn-status, .no-print { display: none !important; }
+            #print-area { display: block !important; visibility: visible !important; width: 100% !important; }
+            .print-item { break-inside: avoid; border-bottom: 2px solid #f1f5f9; padding: 20px 0; }
+        }
         #print-area { display: none; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="min-h-screen pb-20 text-slate-800 text-[13px]">
 
-    <header class="bg-slate-900 text-white py-6 mb-8 shadow-2xl no-print relative overflow-hidden">
+    <!-- Print Sectie (Buiten de main) -->
+    <div id="print-area" class="p-10">
+        <div style="border-bottom: 4px solid #000; padding-bottom: 10px; margin-bottom: 30px; text-align: left;">
+            <h1 style="font-size: 24px; font-weight: 900; text-transform: uppercase;">Mijn Lesplanning</h1>
+            <p id="print-date" style="font-size: 10px; color: #666;"></p>
+        </div>
+        <div id="print-items" class="text-left"></div>
+    </div>
+
+    <header class="bg-slate-900 text-white py-6 mb-8 shadow-2xl no-print relative overflow-hidden text-left">
         <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 blur-[100px] rounded-full"></div>
-        <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6 relative z-10 text-left">
+        <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
             <div class="flex items-center gap-5">
                 <div class="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-colors duration-500" style="background-color: var(--brand-color);">
                     <span class="text-white font-black text-2xl italic">L</span>
@@ -50,21 +64,21 @@
                     <h1 class="text-2xl md:text-3xl font-black tracking-tighter uppercase leading-none italic">LEERPLAN<span style="color: var(--brand-color);">DOELEN</span></h1>
                     <div class="flex items-center gap-2 mt-1">
                         <span id="active-discipline-header" class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Synchroniseren...</span>
-                        <div id="conn-status" class="w-2.5 h-2.5 rounded-full bg-slate-600 transition-all border-2 border-slate-800 shadow-sm"></div>
+                        <div id="conn-status" class="w-2.5 h-2.5 rounded-full bg-slate-600 transition-all border-2 border-slate-800"></div>
                     </div>
                 </div>
             </div>
             <div class="flex items-center gap-3 bg-white/5 p-1.5 rounded-2xl border border-white/10 shadow-inner">
-                <button onclick="setView('grid')" id="grid-view-btn" class="p-2 px-5 rounded-xl text-[10px] font-black uppercase transition-all bg-white/10 text-white">Tegels</button>
+                <button onclick="setView('grid')" id="grid-view-btn" class="p-2 px-5 rounded-xl text-[10px] font-black uppercase transition-all bg-white/10 text-white shadow-inner">Tegels</button>
                 <button onclick="setView('list')" id="list-view-btn" class="p-2 px-5 rounded-xl text-[10px] font-black uppercase transition-all text-slate-400">Lijst</button>
             </div>
         </div>
     </header>
 
-    <main class="container mx-auto px-4">
+    <main class="container mx-auto px-4 no-print">
         <div id="main-content" class="hidden">
             <!-- Filter Paneel -->
-            <div class="glass rounded-[2.5rem] shadow-xl border border-white mb-10 overflow-hidden no-print text-left">
+            <div class="glass rounded-[2.5rem] shadow-xl border border-white mb-10 overflow-hidden text-left">
                 <div onclick="toggleFilterPane()" class="p-5 md:px-10 md:py-6 flex justify-between items-center hover:bg-white/40 transition-all cursor-pointer border-b border-slate-100">
                     <h2 class="section-title text-xl md:text-2xl font-black text-slate-900 tracking-tighter uppercase italic">Keuzeopties leerplandoelen</h2>
                     <span id="filter-chevron" class="text-2xl font-bold">−</span>
@@ -78,17 +92,17 @@
                         </div>
                         <div class="md:col-span-3 space-y-3">
                             <div class="flex justify-between items-center ml-1">
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">2. Doelgroep (Onthouden)</label>
-                                <button onclick="toggleLegend()" class="text-[9px] font-bold text-slate-400 hover:text-slate-900 uppercase underline transition-all font-black italic">Legende fasen ℹ️</button>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">2. Doelgroep (Onthouden)</label>
+                                <button onclick="toggleLegend()" class="text-[9px] font-bold text-slate-400 hover:text-slate-900 uppercase underline transition-all font-black italic">Hulp fasen ℹ️</button>
                             </div>
                             <div id="grade-buttons" class="flex flex-wrap gap-2 text-left"></div>
                         </div>
                     </div>
 
                     <div id="legend-container" class="hidden p-8 bg-slate-900 rounded-[2rem] text-white shadow-2xl text-left italic">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div><h4 class="font-black text-blue-400 uppercase text-xs mb-2">P-route</h4><p class="text-slate-300">F1: 0-8m | F2: 6-18m | F3: 18m-2,5j</p></div>
-                            <div class="border-l border-slate-700 pl-8"><h4 class="font-black text-blue-400 uppercase text-xs mb-2">S-route</h4><p class="text-slate-300">F4: +2,5j | F5: +6j | F6: +10j</p></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 italic">
+                            <div><h4 class="font-black text-blue-400 uppercase text-[10px] mb-2 font-bold">P-route</h4><p class="text-slate-300">F1: 0-8m | F2: 6-18m | F3: 18m-2,5j</p></div>
+                            <div class="border-l border-slate-700 pl-8"><h4 class="font-black text-blue-400 uppercase text-[10px] mb-2 font-bold">S-route</h4><p class="text-slate-300">F4: +2,5j | F5: +6j | F6: +10j</p></div>
                         </div>
                     </div>
 
@@ -109,33 +123,24 @@
         <div id="selection-drawer" class="fixed bottom-8 right-8 z-[100] no-print text-left">
             <div id="selection-list-box" class="hidden mb-6 w-80 md:w-[450px] bg-white rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.25)] border border-slate-200 overflow-hidden flex flex-col max-h-[75vh]">
                 <div class="p-8 bg-slate-900 text-white flex justify-between items-center shadow-lg">
-                    <div><h3 class="font-black text-sm uppercase tracking-widest italic text-blue-400">Mijn Lesdoelen</h3><p class="text-[9px] text-slate-400 font-bold uppercase mt-1">Planner</p></div>
+                    <div><h3 class="font-black text-sm uppercase tracking-widest italic text-blue-400">Mijn Lesdoelen</h3><p class="text-[9px] text-slate-400 font-bold uppercase mt-1">Geselecteerd</p></div>
                     <button onclick="clearSelection()" class="text-[10px] underline opacity-50 hover:opacity-100 font-black uppercase tracking-tighter">Wis alles</button>
                 </div>
-                <div id="selection-items" class="p-8 overflow-y-auto bg-slate-50 space-y-4 flex-1 scrollbar-hide text-left italic text-slate-400">Geen doelen gekozen.</div>
+                <div id="selection-items" class="p-8 overflow-y-auto bg-slate-50 space-y-4 flex-1 scrollbar-hide text-left italic text-slate-400">Nog geen doelen gekozen.</div>
                 <div class="p-8 bg-white border-t border-slate-100 flex flex-col gap-3">
-                    <button onclick="exportSelection()" class="w-full py-5 bg-blue-600 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-100">📋 KOPIËREN NAAR KLEMBORD</button>
-                    <button onclick="printSelection()" class="w-full py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all italic text-center">🖨️ Afdrukken / PDF maken</button>
+                    <button onclick="exportSelection()" class="w-full py-5 bg-blue-600 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl">📋 KOPIËREN</button>
+                    <button onclick="printSelection()" class="w-full py-4 bg-slate-100 text-slate-700 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all italic text-center">🖨️ PDF / AFDRUKKEN</button>
                 </div>
             </div>
-            <button onclick="toggleSelectionDrawer()" class="group p-6 bg-blue-600 text-white rounded-[2.5rem] shadow-2xl hover:scale-110 active:scale-95 transition-all flex items-center gap-5 ring-8 ring-white relative shadow-blue-200">
+            <button onclick="toggleSelectionDrawer()" class="group p-6 bg-blue-600 text-white rounded-[2.5rem] shadow-2xl hover:scale-110 active:scale-95 transition-all flex items-center gap-5 ring-8 ring-white relative">
                 <span class="text-3xl">📋</span><span id="selection-counter" class="font-black text-2xl leading-none">0</span>
             </button>
         </div>
 
-        <!-- PRINT AREA -->
-        <div id="print-area">
-            <div style="border-bottom: 4px solid #000; padding-bottom: 10px; margin-bottom: 30px;">
-                <h1 style="font-size: 28px; font-weight: 900; text-transform: uppercase;">Mijn Lesdoelen</h1>
-                <p style="font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 2px;">Overzicht van geselecteerde leerplandoelen</p>
-            </div>
-            <div id="print-items"></div>
-        </div>
-
         <!-- Loader -->
-        <div id="loading-screen" class="flex flex-col items-center justify-center py-48 text-center no-print text-left">
+        <div id="loading-screen" class="flex flex-col items-center justify-center py-48 text-center no-print">
             <div class="w-24 h-24 border-[12px] border-slate-200 border-t-blue-600 rounded-full animate-spin mb-8 shadow-inner"></div>
-            <p id="loading-text" class="text-slate-400 font-bold uppercase tracking-[0.4em] text-[10px] animate-pulse italic">Synchroniseren...</p>
+            <p id="loading-text" class="text-slate-400 font-black uppercase tracking-[0.4em] text-[10px] animate-pulse italic">Synchroniseren...</p>
         </div>
     </main>
 
@@ -157,7 +162,6 @@
         let viewMode = localStorage.getItem('preferredView') || 'grid';
         let filterGrade = localStorage.getItem('preferredGrade') || 'all';
         let activeDisciplineName = localStorage.getItem('preferredDiscipline') || DISCIPLINES[0].name;
-        let allExamplesShown = false;
 
         async function init() {
             const fetchPromises = DISCIPLINES.map(async (disc) => {
@@ -176,8 +180,7 @@
                                 else if (l.includes('leerplandoel')) cols.goal = h;
                                 else if (l.includes('voorbeeld')) cols.example = h;
                                 else if (l.includes('woordenschat')) cols.vocab = h;
-                                else if (l.includes('domein')) cols.domain = h;
-                                else if (l.includes('soort')) cols.type = h;
+                                else if (l.includes('domein') && !l.includes('sub')) cols.domain = h;
                             });
                             dataCache[disc.name] = { rows: results.data, cols: cols };
                             resolve();
@@ -196,15 +199,14 @@
         }
 
         function showDiscipline(name) {
-            const data = dataCache[name];
-            if(!data) return;
+            if(!dataCache[name]) return;
             activeDisciplineName = name;
             localStorage.setItem('preferredDiscipline', name);
             const disc = DISCIPLINES.find(d => d.name === name);
             document.documentElement.style.setProperty('--brand-color', disc.color);
             document.getElementById('active-discipline-header').innerText = `${disc.icon} ${name}`;
             document.getElementById('discipline-selector').value = name;
-            setupFilters(data);
+            setupFilters(dataCache[name]);
         }
 
         function setupFilters(data) {
@@ -250,29 +252,26 @@
             document.getElementById('result-count').innerText = `${filtered.length} DOELEN GEVONDEN`;
             
             if (viewMode === 'list') {
-                grid.className = "flex flex-col glass rounded-3xl overflow-hidden shadow-lg border border-slate-200";
-                grid.innerHTML = filtered.map((r, idx) => {
-                    const rawIdx = data.rows.indexOf(r);
-                    return `
-                    <div id="list-row-${idx}" class="list-row group flex flex-col">
-                        <div class="flex items-center p-5 cursor-pointer" onclick="toggleListRow(${idx})">
+                grid.className = "flex flex-col glass rounded-3xl overflow-hidden shadow-lg border border-slate-200 no-print";
+                grid.innerHTML = filtered.map((r, idx) => `
+                    <div id="list-row-${idx}" class="list-row group flex flex-col border-b border-slate-100 last:border-0">
+                        <div class="flex items-center p-5 cursor-pointer text-left" onclick="toggleListRow(${idx})">
                             <div class="w-24 font-black text-blue-600 text-[10px]">#${r[data.cols.code] || ''}</div>
                             <div class="flex-1">
-                                <div class="font-black text-slate-900 uppercase tracking-tighter text-[13px] mb-1">${r[data.cols.sub]}</div>
-                                <div class="text-slate-500 font-bold text-[13px] line-clamp-1 opacity-80">${r[data.cols.goal]}</div>
+                                <div class="font-black text-slate-900 uppercase tracking-tighter text-[13px] mb-1 text-left">${r[data.cols.sub]}</div>
+                                <div class="text-slate-500 font-bold text-[13px] line-clamp-1 opacity-80 text-left">${r[data.cols.goal]}</div>
                             </div>
                             <div class="w-32 text-[10px] font-bold text-slate-400 uppercase italic pr-6 text-right">${gradeMapping[(r[data.cols.grade] || "").trim()] || 'Algemeen'}</div>
-                            <button onclick="event.stopPropagation(); addToSelection('${activeDisciplineName}', ${rawIdx}, this)" class="add-btn w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-lg ring-2 ring-white">
+                            <button onclick="event.stopPropagation(); addToSelection('${activeDisciplineName}', ${data.rows.indexOf(r)}, this)" class="add-btn w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-lg ring-2 ring-white">
                                 <span class="text-lg font-bold">＋</span>
                             </button>
                         </div>
-                        <div id="list-detail-${idx}" class="hidden p-8 bg-slate-50/50 border-t border-slate-100 text-left">
+                        <div id="list-detail-${idx}" class="hidden p-8 bg-slate-50 border-t border-slate-100 text-left">
                             <p class="text-[16px] leading-relaxed font-bold text-slate-800 mb-4 italic">${r[data.cols.goal]}</p>
                             ${r[data.cols.vocab] ? `<p class="text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest font-mono">🏷️ ${r[data.cols.vocab]}</p>` : ''}
                             ${r[data.cols.example] ? `<div class="p-5 bg-white rounded-2xl border border-slate-200 text-slate-500 text-[12px] font-medium shadow-inner leading-relaxed">💡 ${r[data.cols.example]}</div>` : ''}
                         </div>
-                    </div>`;
-                }).join('');
+                    </div>`).join('');
             } else {
                 grid.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-24";
                 grid.innerHTML = filtered.map((r, idx) => {
@@ -281,16 +280,16 @@
                     return `
                     <div class="goal-card glass p-8 rounded-[3rem] flex flex-col shadow-sm border border-slate-100 relative text-left">
                         <div class="flex justify-between items-start mb-6">
-                            <div class="flex flex-col gap-1">
+                            <div class="flex flex-col gap-1 text-left">
                                 <div class="flex gap-2 text-left"><span class="px-3 py-1 rounded-full font-black uppercase bg-white ${theme.text} border border-slate-100 shadow-sm text-[8px]">${r[data.cols.domain] || 'ALGEMEEN'}</span></div>
                                 <span class="font-bold text-slate-400 ml-1 tracking-wider uppercase italic text-[10px]">${gradeMapping[(r[data.cols.grade] || "").trim()] || r[data.cols.grade] || 'Algemeen'}</span>
                             </div>
                             <div class="bg-slate-900/5 px-3 py-1 rounded-xl border border-white shadow-sm font-black ${theme.text} italic text-sm text-right">#${r[data.cols.code] || ''}</div>
                         </div>
-                        <h3 class="text-slate-900 font-extrabold text-[15px] leading-snug mb-4 uppercase tracking-tighter">${r[data.cols.sub] || ''}</h3>
+                        <h3 class="text-slate-900 font-extrabold text-[15px] leading-snug mb-4 uppercase tracking-tighter text-left">${r[data.cols.sub] || ''}</h3>
                         <div class="text-slate-700 text-[13px] leading-relaxed font-semibold bg-white/70 p-6 rounded-[2rem] border border-white/50 shadow-inner mb-4 flex-1 text-left">${r[data.cols.goal] || ''}</div>
-                        <div class="mt-auto space-y-3">
-                            <button onclick="addToSelection('${activeDisciplineName}', ${rawIdx}, this)" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">➕ Toevoegen aan lesfiche</button>
+                        <div class="mt-auto space-y-3 text-left">
+                            <button onclick="addToSelection('${activeDisciplineName}', ${data.rows.indexOf(r)}, this)" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">➕ Toevoegen aan lesfiche</button>
                             ${r[data.cols.example] ? `
                                 <div id="ex-${idx}" class="hidden bg-white/60 p-5 rounded-2xl border border-white shadow-sm mb-2 text-slate-600 italic text-[12px]">"${r[data.cols.example]}"</div>
                                 <button id="btn-ex-${idx}" onclick="toggleExample(${idx})" class="w-full py-3 rounded-2xl bg-slate-100 text-slate-400 text-[9px] font-black uppercase hover:bg-white border border-white/50 transition-all">Praktijkvoorbeeld 💡</button>
@@ -301,7 +300,32 @@
             }
         }
 
-        // --- HANDLERS & TOOLS ---
+        // --- PRINT FUNCTIE (DE FIX) ---
+        function printSelection() {
+            const printArea = document.getElementById('print-items');
+            if (selectedGoals.length === 0) return alert("Je mandje is leeg!");
+
+            // Zet datum
+            document.getElementById('print-date').innerText = "Aangemaakt op: " + new Date().toLocaleDateString('nl-BE');
+
+            // Vul de print-area
+            printArea.innerHTML = selectedGoals.map(g => `
+                <div class="print-item">
+                    <div style="font-size: 10px; font-weight: 800; color: #888; text-transform: uppercase;">
+                        ${g.disc} &bull; ${g.grade} &bull; #${g.code}
+                    </div>
+                    <h2 style="font-size: 16px; font-weight: 900; margin: 8px 0; text-transform: uppercase;">${g.sub}</h2>
+                    <p style="font-size: 14px; line-height: 1.6; color: #222;">${g.goal}</p>
+                </div>
+            `).join('');
+
+            // Geef browser tijd om HTML te verwerken
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        }
+
+        // --- REST VAN DE TOOLS ---
         function addToSelection(discName, rowIndex, btn) {
             const item = dataCache[discName].rows[rowIndex];
             const cols = dataCache[discName].cols;
@@ -311,27 +335,23 @@
                 localStorage.setItem('mySelectedGoals', JSON.stringify(selectedGoals));
                 updateSelectionUI();
                 confetti({ particleCount: 150, spread: 80, origin: { y: 0.8 }, colors: [DISCIPLINES.find(d => d.name === discName).color, '#ffffff'] });
-                if(btn) { 
-                    const oldHtml = btn.innerHTML; 
-                    btn.innerHTML = "<span class='text-xs'>✅</span>"; 
-                    btn.style.backgroundColor = "#10b981";
-                    setTimeout(() => { btn.innerHTML = oldHtml; btn.style.backgroundColor = ""; }, 1500); 
-                }
+                if(btn) { btn.innerHTML = "✅"; btn.style.backgroundColor = "#10b981"; setTimeout(() => { btn.innerHTML = "＋"; btn.style.backgroundColor = ""; }, 1500); }
             }
         }
-        function removeFromSelection(i) { selectedGoals.splice(i, 1); localStorage.setItem('mySelectedGoals', JSON.stringify(selectedGoals)); updateSelectionUI(); }
-        function clearSelection() { if(confirm("Mandje legen?")) { selectedGoals = []; localStorage.removeItem('mySelectedGoals'); updateSelectionUI(); } }
+
         function updateSelectionUI() {
             document.getElementById('selection-counter').innerText = selectedGoals.length;
             const container = document.getElementById('selection-items');
+            if (!container) return;
             if (selectedGoals.length === 0) { container.innerHTML = `<p class="italic text-center py-10 opacity-40">Mandje is leeg.</p>`; return; }
-            container.innerHTML = selectedGoals.map((g, i) => `<div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm relative text-left mb-3"><button onclick="removeFromSelection(${i})" class="absolute top-4 right-4 text-slate-300 hover:text-red-500 font-bold text-base">✕</button><div class="text-[9px] font-black text-blue-600 uppercase mb-1">#${g.code} | ${g.disc}</div><div class="font-bold text-slate-800 uppercase tracking-tighter leading-tight text-[11px] font-black uppercase tracking-tighter">${g.sub}</div></div>`).join('');
+            container.innerHTML = selectedGoals.map((g, i) => `<div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm relative text-left mb-3"><button onclick="removeFromSelection(${i})" class="absolute top-4 right-4 text-slate-300 hover:text-red-500 font-bold">✕</button><div class="text-[9px] font-black text-blue-600 uppercase mb-1">#${g.code} | ${g.disc}</div><div class="font-bold text-slate-800 uppercase tracking-tighter leading-tight text-[11px] text-left uppercase">${g.sub}</div></div>`).join('');
         }
-        function printSelection() {
-            const area = document.getElementById('print-items');
-            area.innerHTML = selectedGoals.map(g => `<div style="border-bottom: 2px solid #f1f5f9; padding-bottom: 30px; margin-bottom: 30px; text-align: left;"><div style="font-size: 11px; font-weight: 900; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px;">${g.disc} • ${g.grade} • #${g.code}</div><h2 style="font-size: 18px; font-weight: 900; text-transform: uppercase; color: #0f172a; margin: 0 0 10px 0;">${g.sub}</h2><p style="font-size: 15px; line-height: 1.6; color: #334155; font-weight: 500;">${g.goal}</p></div>`).join('');
-            window.print();
-        }
+
+        function removeFromSelection(i) { selectedGoals.splice(i, 1); localStorage.setItem('mySelectedGoals', JSON.stringify(selectedGoals)); updateSelectionUI(); }
+        function clearSelection() { if(confirm("Mandje legen?")) { selectedGoals = []; localStorage.removeItem('mySelectedGoals'); updateSelectionUI(); } }
+        function toggleFilterPane() { document.getElementById('filter-pane-content').classList.toggle('hidden'); document.getElementById('filter-chevron').innerText = document.getElementById('filter-pane-content').classList.contains('hidden') ? "+" : "−"; }
+        function toggleLegend() { document.getElementById('legend-container').classList.toggle('hidden'); }
+        function toggleSelectionDrawer() { document.getElementById('selection-list-box').classList.toggle('hidden'); }
         function handleDomainChange() { const d = dataCache[activeDisciplineName]; const v = document.getElementById('domain-select').value; let rows = v === 'all' ? d.rows : d.rows.filter(r => r[d.cols.domain] === v); fillDropdown('subdomain-select', d.cols.sub, 'Alle Subdomeinen', rows); document.getElementById('subdomain-select').value = 'all'; handleSubdomainChange(); }
         function handleSubdomainChange() { const d = dataCache[activeDisciplineName]; const dv = document.getElementById('domain-select').value; const sv = document.getElementById('subdomain-select').value; let rows = d.rows; if (dv !== 'all') rows = rows.filter(r => r[d.cols.domain] === dv); if (sv !== 'all') rows = rows.filter(r => r[d.cols.sub] === sv); fillDropdown('cluster-select', d.cols.cluster, 'Alle Clusters', rows); document.getElementById('cluster-select').value = 'all'; render(); }
         function setView(m) { viewMode = m; localStorage.setItem('preferredView', m); document.getElementById('grid-view-btn').className = m === 'grid' ? "p-2 px-5 rounded-xl text-[10px] font-black uppercase transition-all bg-white/10 text-white shadow-inner" : "p-2 px-5 rounded-xl text-[10px] font-black uppercase text-slate-400"; document.getElementById('list-view-btn').className = m === 'list' ? "p-2 px-5 rounded-xl text-[10px] font-black uppercase bg-white/10 text-white shadow-inner" : "p-2 px-5 rounded-xl text-[10px] font-black uppercase text-slate-400"; render(); }
@@ -341,11 +361,8 @@
         function fillDisciplineSelector() { document.getElementById('discipline-selector').innerHTML = DISCIPLINES.map(d => `<option value="${d.name}">${d.name}</option>`).join(''); }
         function updateStatusBadge(s) { const e = document.getElementById('conn-status'); if(e) { e.style.backgroundColor = s === 'live' ? '#10b981' : '#64748b'; } }
         function getTheme(domein) { const d = (domein || "").toLowerCase(); if (d.includes("computationeel") || d.includes("ict")) return { bg: "bg-indigo-50/70", text: "text-indigo-700" }; if (d.includes("getallen") || d.includes("taal")) return { bg: "bg-rose-50/70", text: "text-rose-700" }; if (d.includes("meten") || d.includes("techniek")) return { bg: "bg-amber-50/70", text: "text-amber-700" }; return { bg: "bg-blue-50/70", text: "text-blue-700" }; }
-        function exportSelection() { const text = selectedGoals.map(g => `[${g.disc}] [${g.grade}] ${g.code}: ${g.sub}\nDOEL: ${g.goal}`).join('\n---\n'); navigator.clipboard.writeText(text).then(() => alert("Gekopieerd!")); }
+        function exportSelection() { const text = selectedGoals.map(g => `[${g.disc}] [${g.grade}] ${g.code}: ${g.sub}\nDOEL: ${g.goal}`).join('\n---\n'); navigator.clipboard.writeText(text).then(() => alert("Gekopieerd naar klembord!")); }
         function setGrade(g, b) { filterGrade = g; localStorage.setItem('preferredGrade', g); document.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('active')); if(b) b.classList.add('active'); render(); }
-        function toggleFilterPane() { document.getElementById('filter-pane-content').classList.toggle('hidden'); document.getElementById('filter-chevron').innerText = document.getElementById('filter-pane-content').classList.contains('hidden') ? "+" : "−"; }
-        function toggleLegend() { document.getElementById('legend-container').classList.toggle('hidden'); }
-        function toggleSelectionDrawer() { document.getElementById('selection-list-box').classList.toggle('hidden'); }
 
         window.onload = init;
     </script>
