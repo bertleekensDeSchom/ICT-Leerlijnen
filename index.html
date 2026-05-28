@@ -281,3 +281,65 @@
             uniqueGrades.forEach(g => {
                 const btn = document.createElement('button');
                 btn.className = "filter-btn px-5 py-2.5 rounded-xl border border-slate-200 text-[10px] font-extrabold transition-all hover:bg-slate-50 shadow-sm uppercase tracking-tighter";
+                btn.innerText = g;
+                btn.onclick = () => { filterGrade = g; document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(); };
+                gCont.appendChild(btn);
+            });
+
+            const domains = [...new Set(dataRows.map(r => r[colNames.domain]))].filter(Boolean).sort();
+            document.getElementById('domain-select').innerHTML = '<option value="all">Alle domeinen</option>' + domains.map(d => `<option value="${d}">${d}</option>`).join('');
+
+            const types = [...new Set(dataRows.map(r => r[colNames.type]))].filter(Boolean).sort();
+            document.getElementById('type-select').innerHTML = '<option value="all">Alle soorten</option>' + types.map(t => `<option value="${t}">Soort: ${t}</option>`).join('');
+
+            render();
+        }
+
+        function render() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const domF = document.getElementById('domain-select').value;
+            const typF = document.getElementById('type-select').value;
+            const grid = document.getElementById('goals-grid');
+            
+            const filtered = dataRows.filter(r => {
+                const curVal = r[colNames.grade]?.trim() || "Extra / Algemeen";
+                return (filterGrade === 'all' || curVal === filterGrade) && (domF === 'all' || r[colNames.domain] === domF) && (typF === 'all' || r[colNames.type] === typF) &&
+                       ((r[colNames.goal] || "").toLowerCase().includes(query) || (r[colNames.example] || "").toLowerCase().includes(query) || (r[colNames.sub] || "").toLowerCase().includes(query) || (r[colNames.vocab] || "").toLowerCase().includes(query));
+            });
+
+            document.getElementById('result-count').innerText = `${filtered.length} DOELEN`;
+            grid.innerHTML = filtered.map((r, idx) => {
+                const theme = getTheme(r[colNames.domain]);
+                const rawIdx = dataRows.indexOf(r);
+                return `
+                    <div class="goal-card ${theme.bg} ${theme.border} p-5 md:p-6 rounded-[2.5rem] flex flex-col shadow-sm border-2">
+                        <div class="flex justify-between items-start mb-4 text-[9px]">
+                            <div class="flex flex-col gap-1">
+                                <div class="flex gap-1.5">
+                                    <span class="px-2 py-0.5 rounded-full font-black uppercase tracking-wider bg-white ${theme.text} border border-slate-100 shadow-sm">${r[colNames.domain] || 'ICT'}</span>
+                                    <span class="px-2 py-0.5 rounded-full font-black uppercase tracking-wider bg-slate-900 text-white shadow-sm">${r[colNames.type] || 'G'}</span>
+                                </div>
+                                <span class="font-bold text-slate-400 ml-1 tracking-wider uppercase italic">${r[colNames.grade] || 'Algemeen'}</span>
+                            </div>
+                            <div class="bg-white/90 px-3 py-1 rounded-lg border border-white shadow-sm font-black ${theme.text} italic text-xs leading-none">#${r[colNames.code] || ''}</div>
+                        </div>
+                        <h3 class="text-slate-900 font-extrabold text-[13px] md:text-sm leading-snug mb-3 uppercase tracking-tight">${r[colNames.sub] || ''}</h3>
+                        <div class="text-slate-700 text-[12px] leading-relaxed font-semibold bg-white/70 p-4 rounded-[1.8rem] border border-white/50 shadow-inner mb-3">${r[colNames.goal] || ''}</div>
+                        ${r[colNames.vocab] ? `<div class="flex items-start gap-1.5 px-3 mb-3 opacity-80"><span class="text-[9px] mt-0.5">🏷️</span><p class="text-[10px] font-bold text-slate-500 italic leading-tight"><span class="uppercase text-[8px] not-italic tracking-wider opacity-60">Woordenschat:</span> ${r[colNames.vocab]}</p></div>` : ''}
+                        
+                        <div class="mt-auto space-y-2">
+                            <button onclick="addToSelection(${rawIdx})" class="w-full py-3 rounded-2xl bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-md">➕ Toevoegen aan lesfiche</button>
+                            ${r[colNames.example] ? `
+                                <div id="ex-${idx}" class="hidden bg-white/50 p-4 rounded-xl border border-white shadow-sm mb-2"><p class="text-slate-600 text-[11px] italic leading-relaxed font-medium">"${r[colNames.example]}"</p></div>
+                                <button id="btn-ex-${idx}" onclick="toggleExample(${idx})" class="w-full py-2.5 rounded-xl bg-white/60 text-slate-600 text-[8px] font-black uppercase tracking-widest hover:bg-white transition-all border border-white/50 shadow-sm">Toon praktijkvoorbeeld 💡</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
