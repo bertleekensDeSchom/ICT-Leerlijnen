@@ -48,23 +48,28 @@
             <!-- Filter Dashboard -->
             <div class="bg-white rounded-[2rem] shadow-md border border-slate-100 mb-8 overflow-hidden">
                 <div onclick="toggleFilterPane()" class="p-4 md:px-10 md:py-4 flex justify-between items-center hover:bg-slate-50 transition-colors group cursor-pointer border-b border-slate-50">
-                    <h2 class="section-title text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight italic">Filteropties & Jaar / Fase</h2>
+                    <h2 class="section-title text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight italic text-left">
+                        Filteropties & Jaar / Fase
+                    </h2>
                     <span id="filter-chevron" class="text-slate-400 group-hover:text-blue-600 transition-all font-black text-2xl">−</span>
                 </div>
                 
                 <div id="filter-pane-content" class="px-6 md:px-10 pb-8 pt-1 space-y-4">
+                    
                     <div class="mt-4 pt-2">
                          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                            <div class="md:col-span-1">
-                                <label class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1.5 block italic text-left">1. Discipline</label>
-                                <select id="discipline-selector" onchange="changeDiscipline(this.value)" class="w-full p-3 bg-blue-50 border-none rounded-xl ring-1 ring-blue-200 font-black appearance-none cursor-pointer text-[12px] text-blue-700 focus:ring-2 focus:ring-blue-500 text-left"></select>
+                            <div class="md:col-span-1 text-left">
+                                <label class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1.5 block italic text-left">1. Kies Discipline</label>
+                                <select id="discipline-selector" onchange="changeDiscipline(this.value)" class="w-full p-3 bg-blue-50 border-none rounded-xl ring-1 ring-blue-200 font-black appearance-none cursor-pointer text-[12px] text-blue-700 focus:ring-2 focus:ring-blue-500 text-left">
+                                </select>
                             </div>
-                            <div class="md:col-span-3">
-                                <div class="flex justify-between items-center mb-1.5 text-left">
-                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">2. Selecteer jaar of fase</label>
+                            <div class="md:col-span-3 text-left">
+                                <div class="flex justify-between items-center mb-1.5">
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">2. Selecteer jaar of fase</label>
                                     <button onclick="toggleLegend()" class="text-[9px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg border border-blue-100 hover:bg-blue-100 transition-all font-black uppercase">ℹ️ Legende fasen</button>
                                 </div>
-                                <div id="grade-buttons" class="flex flex-wrap gap-2 text-left"></div>
+                                <div id="grade-buttons" class="flex flex-wrap gap-2 text-left">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -83,14 +88,22 @@
 
                     <!-- Overige Filters -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t border-slate-100 text-left">
-                        <input type="text" id="search-input" onkeyup="render()" placeholder="Zoek op tekst..." class="p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 font-semibold text-slate-700 text-[12px]">
-                        <select id="domain-select" onchange="render()" class="p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 font-bold appearance-none cursor-pointer text-[12px] text-slate-700"></select>
-                        <select id="subdomain-select" onchange="render()" class="p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 font-bold appearance-none cursor-pointer text-[12px] text-slate-700">
-                            <option value="all">Alle Subdomeinen</option>
-                        </select>
-                        <select id="cluster-select" onchange="render()" class="p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 font-bold appearance-none cursor-pointer text-[12px] text-slate-700">
-                            <option value="all">Alle Clusters</option>
-                        </select>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block italic text-left">3. Zoek op tekst</label>
+                            <input type="text" id="search-input" onkeyup="render()" placeholder="Typ trefwoord..." class="w-full p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 font-semibold text-slate-700 text-[12px]">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block italic text-left">Domein</label>
+                            <select id="domain-select" onchange="render()" class="w-full p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 font-bold appearance-none cursor-pointer text-[12px] text-slate-700"></select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block italic text-left">Subdomein</label>
+                            <select id="subdomain-select" onchange="render()" class="w-full p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 font-bold appearance-none cursor-pointer text-[12px] text-slate-700"></select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block italic text-left">Cluster</label>
+                            <select id="cluster-select" onchange="render()" class="w-full p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 font-bold appearance-none cursor-pointer text-[12px] text-slate-700"></select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -101,22 +114,26 @@
                 <button id="master-toggle" onclick="toggleAllExamples()" class="w-full md:w-auto text-[9px] font-black text-slate-700 bg-white border border-slate-200 px-6 py-3 rounded-2xl hover:bg-slate-800 hover:text-white transition-all shadow-sm tracking-tighter uppercase font-black">💡 Toon alle voorbeelden</button>
             </div>
 
-            <div id="goals-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-24 text-left"></div>
+            <div id="goals-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-24 text-left no-print"></div>
         </div>
 
-        <!-- SELECTION DRAWER -->
+        <!-- SELECTION DRAWER (Mandje) -->
         <div id="selection-drawer" class="fixed bottom-6 right-6 z-[100] flex flex-col items-end text-left no-print">
             <div id="selection-list-box" class="hidden mb-4 w-80 md:w-[380px] bg-white rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[70vh]">
-                <div class="p-6 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800">
+                <div class="p-6 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800 shadow-md">
                     <h3 class="font-black text-xs uppercase tracking-widest italic text-blue-400">Mijn Lesdoelen</h3>
                     <button onclick="clearSelection()" class="text-[10px] underline opacity-70 hover:opacity-100 font-black uppercase">Wis alles</button>
                 </div>
-                <div id="selection-items" class="p-6 overflow-y-auto bg-slate-50 space-y-3 flex-1 scrollbar-hide text-xs">
+                <div id="selection-items" class="p-6 overflow-y-auto bg-slate-50 space-y-3 flex-1 scrollbar-hide text-xs italic text-slate-400 text-center">
                     Nog geen doelen toegevoegd.
                 </div>
                 <div class="p-6 bg-white border-t border-slate-100 space-y-2">
-                    <button id="copy-btn" onclick="exportSelection()" class="w-full py-3 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg flex items-center justify-center gap-2">📋 Kopiëren voor lesfiche</button>
-                    <button onclick="printSelection()" class="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-200 transition-all flex items-center justify-center gap-2">🖨️ Print lijst (PDF)</button>
+                    <button id="copy-btn" onclick="exportSelection(event)" class="w-full py-4 bg-blue-600 text-white rounded-[1.2rem] font-black text-[11px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg flex items-center justify-center gap-2">
+                        📋 Kopieer voor lesfiche
+                    </button>
+                    <button onclick="printSelection()" class="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
+                        🖨️ Print lijst (PDF)
+                    </button>
                 </div>
             </div>
             <button onclick="toggleSelectionDrawer()" class="p-5 bg-blue-600 text-white rounded-[2rem] shadow-2xl hover:scale-105 transition-all flex items-center gap-4 ring-8 ring-white relative">
@@ -166,75 +183,55 @@
 
         async function init() {
             let loadedCount = 0;
+            const total = DISCIPLINES.length;
             const fetchPromises = DISCIPLINES.map(async (disc) => {
                 try {
                     const response = await fetch(BASE_URL + disc.gid);
-                    if (!response.ok) throw new Error("Fout bij ophalen");
                     const csv = await response.text();
                     return new Promise((resolve) => {
                         Papa.parse(csv, {
                             header: true, skipEmptyLines: true,
                             complete: (results) => {
-                                let cols = {};
-                                results.meta.fields.forEach(h => {
-                                    const l = h.toLowerCase().trim();
-                                    if (l === 'code') cols.code = h;
-                                    else if (l.includes('jaar') || l.includes('fase')) cols.grade = h;
-                                    else if (l.includes('soort')) cols.type = h;
-                                    else if (l.includes('subdomein')) cols.sub = h;
-                                    else if (l.includes('cluster')) cols.cluster = h;
-                                    else if (l.includes('leerplandoel')) cols.goal = h;
-                                    else if (l.includes('voorbeeld')) cols.example = h;
-                                    else if (l.includes('woordenschat')) cols.vocab = h;
-                                    else if (l.includes('domein') && !l.includes('sub')) cols.domain = h;
-                                });
+                                let cols = { grade:'', domain:'', sub:'', cluster:'', goal:'', example:'', vocab:'', type:'' };
+                                if (results.meta.fields) {
+                                    results.meta.fields.forEach(h => {
+                                        const l = h.toLowerCase().trim();
+                                        if (l === 'code') cols.code = h;
+                                        else if (l.includes('jaar') || l.includes('fase')) cols.grade = h;
+                                        else if (l === 'soort' || l.includes('doel soort')) cols.type = h;
+                                        else if (l.includes('subdomein')) cols.sub = h;
+                                        else if (l.includes('cluster')) cols.cluster = h;
+                                        else if (l.includes('leerplandoel')) cols.goal = h;
+                                        else if (l.includes('voorbeeld')) cols.example = h;
+                                        else if (l.includes('woordenschat')) cols.vocab = h;
+                                        else if (l.includes('domein') && !l.includes('sub')) cols.domain = h;
+                                    });
+                                }
                                 dataCache[disc.name] = { rows: results.data, cols: cols };
                                 loadedCount++;
-                                document.getElementById('loading-text').innerText = `Database laden (${loadedCount}/${DISCIPLINES.length})...`;
+                                document.getElementById('loading-text').innerText = `Database laden (${loadedCount}/${total})...`;
                                 resolve();
                             }
                         });
                     });
-                } catch (e) { console.error(`Fout bij ${disc.name}`, e); }
+                } catch (e) { console.error(e); }
             });
 
             await Promise.all(fetchPromises);
-            
-            try {
-                fillDisciplineSelector();
-                showDiscipline(DISCIPLINES[0].name);
-                updateSelectionUI();
-                document.getElementById('loading-screen').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-                updateStatusBadge('live');
-            } catch (err) {
-                console.error("Fout na laden data:", err);
-                document.getElementById('loading-text').innerText = "FOUT: " + err.message;
-            }
-        }
-
-        function fillDisciplineSelector() {
-            const sel = document.getElementById('discipline-selector');
-            if(!sel) return;
-            sel.innerHTML = DISCIPLINES.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
-        }
-
-        function showDiscipline(name) {
-            activeDiscipline = DISCIPLINES.find(d => d.name === name);
-            document.getElementById('active-discipline-header').innerText = activeDiscipline.name;
-            setupUI();
-        }
-
-        function changeDiscipline(name) {
-            filterGrade = 'all';
-            showDiscipline(name);
+            fillDisciplineSelector();
+            showDiscipline(activeDiscipline.name);
+            updateSelectionUI();
+            document.getElementById('loading-screen').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            updateStatusBadge('live');
         }
 
         function setupUI() {
             const currentData = dataCache[activeDiscipline.name];
             if(!currentData) return;
             const cols = currentData.cols;
-            
+
+            // Grade buttons
             const gCont = document.getElementById('grade-buttons');
             if(gCont) {
                 gCont.innerHTML = '';
@@ -257,24 +254,34 @@
                 });
             }
 
-            populateDropdown('domain-select', cols.domain, 'Alle Domeinen');
-            populateDropdown('subdomain-select', cols.sub, 'Alle Subdomeinen');
-            populateDropdown('cluster-select', cols.cluster, 'Alle Clusters');
+            safePopulateDropdown('domain-select', cols.domain, 'Alle Domeinen');
+            safePopulateDropdown('subdomain-select', cols.sub, 'Alle Subdomeinen');
+            safePopulateDropdown('cluster-select', cols.cluster, 'Alle Clusters');
             
-            const typeKey = cols.type;
-            const types = [...new Set(currentData.rows.map(r => r[typeKey]))].filter(Boolean).sort();
-            document.getElementById('type-select').innerHTML = '<option value="all">Alle doelsoorten</option>' + types.map(t => `<option value="${t}">Soort: ${t}</option>`).join('');
+            const typeEl = document.getElementById('type-select');
+            if(typeEl) {
+                const types = [...new Set(currentData.rows.map(r => r[cols.type]))].filter(Boolean).sort();
+                typeEl.innerHTML = '<option value="all">Alle doelsoorten</option>' + types.map(t => `<option value="${t}">Soort: ${t}</option>`).join('');
+            }
 
             render();
         }
 
-        function populateDropdown(id, key, defaultText) {
+        function safePopulateDropdown(id, key, defaultText) {
             const el = document.getElementById(id);
             if (!el) return;
             if (!key) { el.classList.add('hidden'); return; }
             el.classList.remove('hidden');
             const items = [...new Set(dataCache[activeDiscipline.name].rows.map(r => r[key]))].filter(Boolean).sort();
             el.innerHTML = `<option value="all">${defaultText}</option>` + items.map(i => `<option value="${i}">${i}</option>`).join('');
+        }
+
+        function setGrade(g, btn) {
+            filterGrade = g;
+            localStorage.setItem('preferredGrade', g);
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            render();
         }
 
         function render() {
@@ -289,13 +296,17 @@
             const grid = document.getElementById('goals-grid');
             
             const filtered = currentData.rows.filter(r => {
-                const rawG = (r[cols.grade] || "").trim();
-                const mappedGrade = gradeMapping[rawG] || rawG || "Extra / Algemeen";
+                const rawGrade = (r[cols.grade] || "").trim();
+                const mappedGrade = gradeMapping[rawGrade] || rawGrade || "Extra / Algemeen";
                 return (filterGrade === 'all' || mappedGrade === filterGrade) && (domF === 'all' || r[cols.domain] === domF) && (subdomF === 'all' || r[cols.sub] === subdomF) && (clusterF === 'all' || r[cols.cluster] === clusterF) && (typeF === 'all' || r[cols.type] === typeF) &&
                        ((r[cols.goal] || "").toLowerCase().includes(query) || (r[cols.example] || "").toLowerCase().includes(query) || (r[cols.sub] || "").toLowerCase().includes(query) || (r[cols.vocab] || "").toLowerCase().includes(query));
             });
 
-            document.getElementById('result-count').innerText = `${filtered.length} DOELEN GEVONDEN`;
+            if(document.getElementById('result-count')) {
+                document.getElementById('result-count').innerText = `${filtered.length} DOELEN GEVONDEN`;
+            }
+
+            if(!grid) return;
             grid.innerHTML = filtered.map((r, idx) => {
                 const theme = getTheme(r[cols.domain]);
                 const rawIdx = currentData.rows.indexOf(r);
@@ -319,17 +330,8 @@
                                 <button id="btn-ex-${idx}" onclick="toggleExample(${idx})" class="w-full py-2.5 rounded-xl bg-white/60 text-slate-600 text-[8px] font-black uppercase tracking-widest hover:bg-white border border-white/50">Toon praktijkvoorbeeld 💡</button>
                             ` : ''}
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }).join('');
-        }
-
-        function setGrade(g, btn) {
-            filterGrade = g;
-            localStorage.setItem('preferredGrade', g);
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            render();
         }
 
         function addToSelection(discName, rowIndex) {
@@ -408,10 +410,29 @@
             document.getElementById('master-toggle').innerText = allExamplesShown ? "🔝 Verberg alle voorbeelden" : "💡 Toon alle voorbeelden";
         }
 
-        function toggleFilterPane() { document.getElementById('filter-pane-content').classList.toggle('hidden'); document.getElementById('filter-chevron').innerText = document.getElementById('filter-pane-content').classList.contains('hidden') ? "+" : "−"; }
-        function toggleLegend() { document.getElementById('legend-container').classList.toggle('hidden'); }
-        function toggleSelectionDrawer() { document.getElementById('selection-list-box').classList.toggle('hidden'); }
-        function updateStatusBadge(s) { const el = document.getElementById('conn-status'); if(s === 'live') { el.innerText = "Status: Live"; el.className = "text-[10px] font-black px-4 py-1.5 rounded-full bg-green-600 text-white shadow-md uppercase tracking-widest"; } else { el.innerText = "Status: Verbinden..."; el.className = "text-[10px] font-black px-4 py-1.5 rounded-full bg-slate-800 text-slate-400 uppercase tracking-widest"; } }
+        function fillDisciplineSelector() {
+            const sel = document.getElementById('discipline-selector');
+            if(!sel) return;
+            sel.innerHTML = DISCIPLINES.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
+        }
+
+        function changeDiscipline(name) {
+            activeDiscipline = DISCIPLINES.find(d => d.name === name);
+            setupUI();
+        }
+
+        function showDiscipline(name) {
+            activeDiscipline = DISCIPLINES.find(d => d.name === name);
+            setupUI();
+        }
+
+        function updateStatusBadge(status) {
+            const el = document.getElementById('conn-status');
+            if(!el) return;
+            if(status === 'live') { el.innerText = "Status: Live"; el.className = "text-[10px] font-black px-4 py-1.5 rounded-full bg-green-600 text-white shadow-md uppercase tracking-widest"; }
+            else { el.innerText = "Status: Laden..."; el.className = "text-[10px] font-black px-4 py-1.5 rounded-full bg-slate-800 text-slate-400 uppercase tracking-widest"; }
+        }
+
         function getTheme(domein) {
             const d = (domein || "").toLowerCase();
             if (d.includes("computationeel") || d.includes("ict")) return { bg: "bg-indigo-50/70", border: "border-indigo-100", text: "text-indigo-700" };
@@ -420,6 +441,17 @@
             if (d.includes("meetkunde") || d.includes("beweging") || d.includes("creatie")) return { bg: "bg-emerald-50/70", border: "border-emerald-100", text: "text-emerald-700" };
             return { bg: "bg-blue-50/70", border: "border-blue-100", text: "text-blue-700" };
         }
+
+        function toggleFilterPane() {
+            const content = document.getElementById('filter-pane-content');
+            const chevron = document.getElementById('filter-chevron');
+            if(!content || !chevron) return;
+            content.classList.toggle('hidden');
+            chevron.innerText = content.classList.contains('hidden') ? "+" : "−";
+        }
+
+        function toggleLegend() { document.getElementById('legend-container').classList.toggle('hidden'); }
+        function toggleSelectionDrawer() { document.getElementById('selection-list-box').classList.toggle('hidden'); }
 
         window.onload = init;
     </script>
