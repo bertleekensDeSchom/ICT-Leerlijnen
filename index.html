@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICT-Leerplandoelen Dashboard</title>
+    <title>Centrale Database Leerplandoelen</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -24,13 +24,18 @@
     <header class="bg-slate-900 text-white py-5 mb-6 shadow-lg">
         <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
             <div>
-                <h1 class="text-2xl md:text-4xl font-extrabold tracking-tighter uppercase leading-none italic text-blue-500">
-                    ICT-LEERPLANDOELEN
+                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tighter uppercase leading-none italic">
+                    <span id="active-discipline-title" class="text-blue-500 uppercase">Laden...</span>
                 </h1>
-                <p class="text-slate-400 mt-1 font-medium tracking-widest text-[10px] uppercase opacity-80">Dashboard & Selectie-tool</p>
+                <p class="text-slate-400 mt-1 font-medium tracking-widest text-[10px] uppercase opacity-80 font-mono">Leerplan Dashboard & Lesfiche Tool</p>
             </div>
-            <div id="conn-status" class="text-[9px] font-black px-4 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 uppercase tracking-[0.15em]">
-                Status: Verbinden...
+            
+            <!-- DISCIPLINE KIEZER -->
+            <div class="flex items-center gap-3 bg-slate-800 p-2 rounded-2xl border border-slate-700 shadow-inner">
+                <span class="text-[9px] font-black uppercase tracking-[0.2em] ml-2 text-slate-500">Discipline:</span>
+                <select id="discipline-selector" onchange="changeDiscipline(this.value)" class="bg-slate-900 text-blue-400 font-black uppercase tracking-tighter text-sm py-2 px-4 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                    <!-- Opties worden geladen via JS -->
+                </select>
             </div>
         </div>
     </header>
@@ -39,7 +44,7 @@
         
         <div id="main-content" class="hidden">
             <!-- Filter Dashboard -->
-            <div class="bg-white rounded-[2rem] shadow-md border border-slate-100 mb-8 overflow-hidden">
+            <div class="bg-white rounded-[2.5rem] shadow-md border border-slate-100 mb-8 overflow-hidden">
                 <div onclick="toggleFilterPane()" class="p-4 md:px-10 md:py-4 flex justify-between items-center hover:bg-slate-50 transition-colors group cursor-pointer border-b border-slate-50">
                     <h2 class="section-title text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight italic">
                         Filteropties & Jaar / Fase
@@ -48,13 +53,13 @@
                 </div>
                 
                 <div id="filter-pane-content" class="px-6 md:px-10 pb-8 pt-1 space-y-4">
-                    <div>
+                    <div class="mt-2">
                         <div class="flex justify-between items-center mb-1">
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Selecteer een jaar of fase</label>
                             <button onclick="toggleLegend()" class="text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-xl border border-blue-100 shadow-sm hover:bg-blue-100 transition-all">ℹ️ Legende fasen</button>
                         </div>
                         <div id="grade-buttons" class="flex flex-wrap gap-2 md:gap-3">
-                            <button onclick="location.reload()" id="btn-all" class="filter-btn active px-5 py-2.5 rounded-xl border border-slate-200 text-[13px] font-black transition-all hover:bg-slate-50 shadow-sm uppercase tracking-tight">Alle doelen</button>
+                            <!-- Knoppen worden geladen via JS -->
                         </div>
                     </div>
 
@@ -101,7 +106,7 @@
         <!-- SELECTION DRAWER -->
         <div id="selection-drawer" class="fixed bottom-6 right-6 z-[100] flex flex-col items-end">
             <div id="selection-list-box" class="hidden mb-4 w-80 md:w-[380px] bg-white rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[70vh]">
-                <div class="p-6 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800">
+                <div class="p-6 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800 shadow-md">
                     <h3 class="font-black text-xs uppercase tracking-widest italic text-blue-400">Mijn Les-Doelen</h3>
                     <button onclick="clearSelection()" class="text-[10px] underline opacity-70 hover:opacity-100 font-bold">WIS ALLES</button>
                 </div>
@@ -109,7 +114,7 @@
                     <p class="text-slate-400 italic text-center py-10 text-xs">Nog geen doelen toegevoegd.</p>
                 </div>
                 <div class="p-6 bg-white border-t border-slate-100">
-                    <button id="copy-btn" onclick="exportSelection(event)" class="w-full py-4 bg-blue-600 text-white rounded-[1.2rem] font-black text-[11px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg">
+                    <button id="copy-btn" onclick="exportSelection(event)" class="w-full py-4 bg-blue-600 text-white rounded-[1.2rem] font-black text-[11px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg flex items-center justify-center gap-2">
                         📋 Kopieer voor lesfiche
                     </button>
                 </div>
@@ -128,19 +133,30 @@
     </main>
 
     <script>
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCFdDnFXhAe6lt-EzZ-VeHTg54dWNk-PuIDtYTN1hUd_yDxnhaUhdy1hQDx3QXjGtZIhmwUfIVe7az/pub?gid=1392774175&single=true&output=csv';
+        // --- DISCIPLINES CONFIGURATIE ---
+        const BASE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCFdDnFXhAe6lt-EzZ-VeHTg54dWNk-PuIDtYTN1hUd_yDxnhaUhdy1hQDx3QXjGtZIhmwUfIVe7az/pub?output=csv&gid=';
         
+        const DISCIPLINES = [
+            { name: "ICT", gid: "1392774175" },
+            { name: "Wiskunde", gid: "795366275" },
+            { name: "Taal en Communicatie", gid: "1465352920" },
+            { name: "Wetenschap en Techniek", gid: "2053307938" },
+            { name: "Bewegingsopvoeding", gid: "1884684693" }
+        ];
+
         let dataRows = [];
         let selectedGoals = [];
         let filterGrade = 'all';
+        let activeDiscipline = DISCIPLINES[0];
         let allExamplesShown = false;
         let colNames = { grade: '', domain: '', type: '', code: '', sub: '', goal: '', example: '', vocab: '' };
 
         const gradeOrder = ["Fase 1", "Fase 2", "Fase 3", "Fase 4", "Fase 5", "Fase 6", "jongste kleuters", "2de kleuterklas", "3de kleuterklas", "Leerjaar 1", "Leerjaar 2", "Leerjaar 3", "Leerjaar 4", "Leerjaar 5", "Leerjaar 6", "Extra / Algemeen"];
 
         async function init() {
+            showLoading(true);
             try {
-                const response = await fetch(SHEET_URL);
+                const response = await fetch(BASE_URL + activeDiscipline.gid);
                 if (!response.ok) throw new Error("Netwerk response was niet ok.");
                 const csv = await response.text();
                 Papa.parse(csv, {
@@ -149,11 +165,65 @@
                         dataRows = results.data;
                         identifyColumns(results.meta.fields || []);
                         setupUI();
+                        showLoading(false);
                     }
                 });
             } catch (e) {
                 document.getElementById('loading-text').innerText = "FOUT: " + e.message;
             }
+        }
+
+        function setupUI() {
+            document.getElementById('main-content').classList.remove('hidden');
+            document.getElementById('active-discipline-title').innerText = activeDiscipline.name;
+            
+            const sel = document.getElementById('discipline-selector');
+            if (sel.options.length === 0) {
+                DISCIPLINES.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d.name; opt.innerText = d.name;
+                    sel.appendChild(opt);
+                });
+            }
+
+            const gCont = document.getElementById('grade-buttons');
+            gCont.innerHTML = '';
+            
+            const btnAll = document.createElement('button');
+            btnAll.className = `filter-btn ${filterGrade === 'all' ? 'active' : ''} px-5 py-2.5 rounded-xl border border-slate-200 text-[13px] font-black transition-all hover:bg-slate-50 shadow-sm uppercase tracking-tight`;
+            btnAll.innerText = "Alle doelen";
+            btnAll.onclick = () => { filterGrade = 'all'; document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btnAll.classList.add('active'); render(); };
+            gCont.appendChild(btnAll);
+
+            let uniqueGrades = [...new Set(dataRows.map(r => (r[colNames.grade] || "").trim() || "Extra / Algemeen"))];
+            uniqueGrades.sort((a, b) => (gradeOrder.indexOf(a) === -1 ? 999 : gradeOrder.indexOf(a)) - (gradeOrder.indexOf(b) === -1 ? 999 : gradeOrder.indexOf(b)));
+
+            uniqueGrades.forEach(g => {
+                const btn = document.createElement('button');
+                btn.className = `filter-btn ${filterGrade === g ? 'active' : ''} px-5 py-2.5 rounded-xl border border-slate-200 text-[13px] font-black transition-all hover:bg-slate-50 shadow-sm uppercase tracking-tight`;
+                btn.innerText = g;
+                btn.onclick = () => { filterGrade = g; document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(); };
+                gCont.appendChild(btn);
+            });
+
+            document.getElementById('domain-select').innerHTML = '<option value="all">Alle domeinen</option>' + 
+                [...new Set(dataRows.map(r => r[colNames.domain]))].filter(Boolean).sort().map(d => `<option value="${d}">${d}</option>`).join('');
+
+            document.getElementById('type-select').innerHTML = '<option value="all">Alle doelsoorten</option>' + 
+                [...new Set(dataRows.map(r => r[colNames.type]))].filter(Boolean).sort().map(t => `<option value="${t}">Soort: ${t}</option>`).join('');
+
+            render();
+        }
+
+        function changeDiscipline(name) {
+            activeDiscipline = DISCIPLINES.find(d => d.name === name);
+            filterGrade = 'all';
+            init();
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading-screen').classList.toggle('hidden', !show);
+            document.getElementById('main-content').classList.toggle('hidden', show);
         }
 
         function identifyColumns(headers) {
@@ -173,8 +243,8 @@
         function toggleFilterPane() {
             const content = document.getElementById('filter-pane-content');
             const chevron = document.getElementById('filter-chevron');
-            const isHidden = content.classList.toggle('hidden');
-            chevron.innerText = isHidden ? "+" : "−";
+            content.classList.toggle('hidden');
+            chevron.innerText = content.classList.contains('hidden') ? "+" : "−";
         }
 
         function toggleLegend() { document.getElementById('legend-container').classList.toggle('hidden'); }
@@ -182,26 +252,21 @@
 
         function addToSelection(idx) {
             const item = dataRows[idx];
-            if (!selectedGoals.find(g => g.code === item[colNames.code] && g.goal === item[colNames.goal])) {
-                selectedGoals.push({
-                    code: item[colNames.code] || 'N/A',
-                    goal: item[colNames.goal] || '',
-                    sub: item[colNames.sub] || '',
-                    vocab: item[colNames.vocab] || ''
-                });
+            const goalData = {
+                disc: activeDiscipline.name,
+                code: item[colNames.code] || '?',
+                goal: item[colNames.goal] || '',
+                sub: item[colNames.sub] || '',
+                vocab: item[colNames.vocab] || ''
+            };
+            if (!selectedGoals.find(g => g.code === goalData.code && g.goal === goalData.goal)) {
+                selectedGoals.push(goalData);
                 updateSelectionUI();
             }
         }
 
-        function removeFromSelection(idx) {
-            selectedGoals.splice(idx, 1);
-            updateSelectionUI();
-        }
-
-        function clearSelection() {
-            selectedGoals = [];
-            updateSelectionUI();
-        }
+        function removeFromSelection(idx) { selectedGoals.splice(idx, 1); updateSelectionUI(); }
+        function clearSelection() { selectedGoals = []; updateSelectionUI(); }
 
         function updateSelectionUI() {
             document.getElementById('selection-counter').innerText = selectedGoals.length;
@@ -213,7 +278,10 @@
             container.innerHTML = selectedGoals.map((g, i) => `
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm relative group">
                     <button onclick="removeFromSelection(${i})" class="absolute top-2 right-2 text-slate-300 hover:text-red-500 font-bold">✕</button>
-                    <div class="text-[9px] font-black text-blue-600 mb-1 leading-none uppercase tracking-tighter">#${g.code}</div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-[8px] bg-blue-100 text-blue-600 px-1.5 rounded font-black uppercase">${g.disc}</span>
+                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">#${g.code}</div>
+                    </div>
                     <div class="text-[11px] font-extrabold text-slate-800 leading-tight pr-4 uppercase tracking-tighter">${g.sub}</div>
                 </div>
             `).join('');
@@ -223,12 +291,10 @@
             if (selectedGoals.length === 0) return;
             const btn = document.getElementById('copy-btn');
             const text = selectedGoals.map(g => 
-                `DOEL: ${g.code} - ${g.sub}\nBESCHRIJVING: ${g.goal}${g.vocab ? '\nWOORDENSCHAT: ' + g.vocab : ''}\n`
+                `[${g.disc}] DOEL: ${g.code} - ${g.sub}\nBESCHRIJVING: ${g.goal}${g.vocab ? '\nWOORDENSCHAT: ' + g.vocab : ''}\n`
             ).join('\n--------------------------\n');
-            
             navigator.clipboard.writeText(text).then(() => {
-                const originalText = btn.innerHTML;
-                btn.innerText = "✅ GEKOPIEERD!";
+                const originalText = btn.innerHTML; btn.innerText = "✅ GEKOPIEERD!";
                 setTimeout(() => { btn.innerHTML = originalText; }, 2000);
             });
         }
@@ -236,10 +302,10 @@
         function toggleExample(id) {
             const content = document.getElementById(`ex-${id}`);
             const btn = document.getElementById(`btn-ex-${id}`);
-            const isHidden = content.classList.toggle('hidden');
+            const isHidden = content.classList.contains('hidden');
+            content.classList.toggle('hidden');
             btn.innerText = isHidden ? "Toon praktijkvoorbeeld 💡" : "Verberg voorbeeld 🔼";
-            btn.classList.toggle('bg-slate-800', !isHidden);
-            btn.classList.toggle('text-white', !isHidden);
+            btn.classList.toggle('bg-slate-800', !isHidden); btn.classList.toggle('text-white', !isHidden);
         }
 
         function toggleAllExamples() {
@@ -261,39 +327,6 @@
             return { bg: "bg-blue-50/70", border: "border-blue-100", text: "text-blue-700" };
         }
 
-        function setupUI() {
-            document.getElementById('loading-screen').classList.add('hidden');
-            document.getElementById('main-content').classList.remove('hidden');
-            document.getElementById('conn-status').innerText = "LIVE VERBONDEN";
-            document.getElementById('conn-status').classList.replace('bg-slate-800', 'bg-green-600');
-
-            const gradeKey = colNames.grade;
-            let uniqueGrades = [...new Set(dataRows.map(r => (r[gradeKey] || "").trim() || "Extra / Algemeen"))];
-            uniqueGrades.sort((a, b) => {
-                let iA = gradeOrder.indexOf(a); let iB = gradeOrder.indexOf(b);
-                return (iA === -1 ? 999 : iA) - (iB === -1 ? 999 : iB);
-            });
-
-            const gCont = document.getElementById('grade-buttons');
-            uniqueGrades.forEach(g => {
-                const btn = document.createElement('button');
-                btn.className = "filter-btn px-5 py-2.5 rounded-xl border border-slate-200 text-[13px] font-black transition-all hover:bg-slate-50 shadow-sm uppercase tracking-tight";
-                btn.innerText = g;
-                btn.onclick = () => { filterGrade = g; document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(); };
-                gCont.appendChild(btn);
-            });
-
-            const domKey = colNames.domain;
-            const domains = [...new Set(dataRows.map(r => r[domKey]))].filter(Boolean).sort();
-            document.getElementById('domain-select').innerHTML = '<option value="all">Alle domeinen</option>' + domains.map(d => `<option value="${d}">${d}</option>`).join('');
-
-            const typeKey = colNames.type;
-            const types = [...new Set(dataRows.map(r => r[typeKey]))].filter(Boolean).sort();
-            document.getElementById('type-select').innerHTML = '<option value="all">Alle doelsoorten</option>' + types.map(t => `<option value="${t}">Soort: ${t}</option>`).join('');
-
-            render();
-        }
-
         function render() {
             const query = document.getElementById('search-input').value.toLowerCase();
             const domF = document.getElementById('domain-select').value;
@@ -301,46 +334,40 @@
             const grid = document.getElementById('goals-grid');
             
             const filtered = dataRows.filter(r => {
-                const curGradeVal = (r[colNames.grade] || "").trim() || "Extra / Algemeen";
-                const mG = (filterGrade === 'all' || curGradeVal === filterGrade);
-                const mD = (domF === 'all' || r[colNames.domain] === domF);
-                const mT = (typF === 'all' || r[colNames.type] === typF);
-                const mS = ( (r[colNames.goal] || "").toLowerCase().includes(query) || (r[colNames.example] || "").toLowerCase().includes(query) || (r[colNames.sub] || "").toLowerCase().includes(query) || (r[colNames.vocab] || "").toLowerCase().includes(query) );
-                return mG && mD && mT && mS;
+                const curVal = (r[colNames.grade] || "").trim() || "Extra / Algemeen";
+                return (filterGrade === 'all' || curVal === filterGrade) && (domF === 'all' || r[colNames.domain] === domF) && (typF === 'all' || r[colNames.type] === typF) &&
+                       ((r[colNames.goal] || "").toLowerCase().includes(query) || (r[colNames.example] || "").toLowerCase().includes(query) || (r[colNames.sub] || "").toLowerCase().includes(query) || (r[colNames.vocab] || "").toLowerCase().includes(query));
             });
 
             document.getElementById('result-count').innerText = `${filtered.length} DOELEN GEVONDEN`;
-            grid.innerHTML = '';
-            
-            filtered.forEach((r, idx) => {
+            grid.innerHTML = filtered.map((r, idx) => {
                 const theme = getTheme(r[colNames.domain]);
                 const rawIdx = dataRows.indexOf(r);
-                const card = document.createElement('div');
-                card.className = `goal-card ${theme.bg} ${theme.border} p-5 md:p-6 rounded-[2.5rem] flex flex-col shadow-sm border-2`;
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-4 text-[9px]">
-                        <div class="flex flex-col gap-1">
-                            <div class="flex gap-1.5">
-                                <span class="px-2 py-0.5 rounded-full font-black uppercase bg-white ${theme.text} border border-slate-100 shadow-sm">${r[colNames.domain] || 'ICT'}</span>
-                                <span class="px-2 py-0.5 rounded-full font-black uppercase bg-slate-900 text-white shadow-sm">${r[colNames.type] || 'G'}</span>
+                return `
+                    <div class="goal-card ${theme.bg} ${theme.border} p-5 md:p-6 rounded-[2.5rem] flex flex-col shadow-sm border-2">
+                        <div class="flex justify-between items-start mb-4 text-[9px]">
+                            <div class="flex flex-col gap-1">
+                                <div class="flex gap-1.5">
+                                    <span class="px-2 py-0.5 rounded-full font-black uppercase bg-white ${theme.text} border border-slate-100 shadow-sm">${r[colNames.domain] || 'ALGEMEEN'}</span>
+                                    <span class="px-2 py-0.5 rounded-full font-black uppercase bg-slate-900 text-white shadow-sm">${r[colNames.type] || 'G'}</span>
+                                </div>
+                                <span class="font-bold text-slate-400 ml-1 tracking-wider uppercase italic">${r[colNames.grade] || 'Algemeen'}</span>
                             </div>
-                            <span class="font-bold text-slate-400 ml-1 tracking-wider uppercase italic">${r[colNames.grade] || 'Algemeen'}</span>
+                            <div class="bg-white/90 px-3 py-1 rounded-lg border border-white shadow-sm font-black ${theme.text} italic text-xs leading-none">#${r[colNames.code] || ''}</div>
                         </div>
-                        <div class="bg-white/90 px-3 py-1 rounded-lg border border-white shadow-sm font-black ${theme.text} italic text-xs leading-none">#${r[colNames.code] || ''}</div>
-                    </div>
-                    <h3 class="text-slate-900 font-extrabold text-[13px] md:text-sm leading-snug mb-3 uppercase tracking-tight">${r[colNames.sub] || ''}</h3>
-                    <div class="text-slate-700 text-[12px] leading-relaxed font-semibold bg-white/70 p-4 rounded-[1.8rem] border border-white/50 shadow-inner mb-3">${r[colNames.goal] || ''}</div>
-                    ${r[colNames.vocab] ? `<div class="flex items-start gap-1.5 px-3 mb-3 opacity-80"><span class="text-[9px] mt-0.5">🏷️</span><p class="text-[10px] font-bold text-slate-500 italic leading-tight"><span class="uppercase text-[8px] not-italic tracking-wider opacity-60">Woordenschat:</span> ${r[colNames.vocab]}</p></div>` : ''}
-                    <div class="mt-auto space-y-2">
-                        <button onclick="addToSelection(${rawIdx})" class="w-full py-2.5 rounded-xl bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-md">➕ Toevoegen aan lesfiche</button>
-                        ${r[colNames.example] ? `
-                            <div id="ex-${idx}" class="hidden bg-white/50 p-4 rounded-xl border border-white shadow-sm mb-2"><p class="text-slate-600 text-[11px] italic leading-relaxed font-medium">"${r[colNames.example]}"</p></div>
-                            <button id="btn-ex-${idx}" onclick="toggleExample(${idx})" class="w-full py-2.5 rounded-xl bg-white/60 text-slate-600 text-[8px] font-black uppercase tracking-widest hover:bg-white transition-all border border-white/50 shadow-sm">Toon praktijkvoorbeeld 💡</button>
-                        ` : ''}
+                        <h3 class="text-slate-900 font-extrabold text-[13px] md:text-sm leading-snug mb-3 uppercase tracking-tight">${r[colNames.sub] || ''}</h3>
+                        <div class="text-slate-700 text-[12px] leading-relaxed font-semibold bg-white/70 p-4 rounded-[1.8rem] border border-white/50 shadow-inner mb-3">${r[colNames.goal] || ''}</div>
+                        ${r[colNames.vocab] ? `<div class="flex items-start gap-1.5 px-3 mb-3 opacity-80"><span class="text-[9px] mt-0.5">🏷️</span><p class="text-[10px] font-bold text-slate-500 italic leading-tight"><span class="uppercase text-[8px] not-italic tracking-wider opacity-60">Woordenschat:</span> ${r[colNames.vocab]}</p></div>` : ''}
+                        <div class="mt-auto space-y-2">
+                            <button onclick="addToSelection(${rawIdx})" class="w-full py-2.5 rounded-xl bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-md">➕ Toevoegen aan lesfiche</button>
+                            ${r[colNames.example] ? `
+                                <div id="ex-${idx}" class="hidden bg-white/50 p-4 rounded-xl border border-white shadow-sm mb-2"><p class="text-slate-600 text-[11px] italic leading-relaxed font-medium">"${r[colNames.example]}"</p></div>
+                                <button id="btn-ex-${idx}" onclick="toggleExample(${idx})" class="w-full py-2.5 rounded-xl bg-white/60 text-slate-600 text-[8px] font-black uppercase tracking-widest hover:bg-white transition-all border border-white/50 shadow-sm">Toon praktijkvoorbeeld 💡</button>
+                            ` : ''}
+                        </div>
                     </div>
                 `;
-                grid.appendChild(card);
-            });
+            }).join('');
         }
 
         window.onload = init;
