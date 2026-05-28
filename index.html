@@ -35,13 +35,13 @@
         </div>
     </header>
 
-    <main class="container mx-auto px-4">
+    <main class="container mx-auto px-4 text-left">
         
         <div id="main-content" class="hidden">
             <!-- Filter Dashboard -->
-            <div class="bg-white rounded-[2rem] shadow-md border border-slate-100 mb-8 overflow-hidden text-left">
+            <div class="bg-white rounded-[2rem] shadow-md border border-slate-100 mb-8 overflow-hidden">
                 <div onclick="toggleFilterPane()" class="p-4 md:px-10 md:py-4 flex justify-between items-center hover:bg-slate-50 transition-colors group cursor-pointer border-b border-slate-50">
-                    <h2 class="section-title text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight italic text-left">
+                    <h2 class="section-title text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight italic">
                         Filteropties & Jaar / Fase
                     </h2>
                     <span id="filter-chevron" class="text-slate-400 group-hover:text-blue-600 transition-all font-black text-2xl">−</span>
@@ -51,29 +51,29 @@
                     
                     <div class="mt-4 pt-2">
                          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                            <div class="md:col-span-1 text-left">
+                            <div class="md:col-span-1">
                                 <label class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1.5 block italic text-left">1. Kies Discipline</label>
                                 <select id="discipline-selector" onchange="changeDiscipline(this.value)" class="w-full p-3 bg-blue-50 border-none rounded-xl ring-1 ring-blue-200 font-black appearance-none cursor-pointer text-[12px] text-blue-700 focus:ring-2 focus:ring-blue-500 text-left">
                                 </select>
                             </div>
-                            <div class="md:col-span-3 text-left">
+                            <div class="md:col-span-3">
                                 <div class="flex justify-between items-center mb-1.5">
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">2. Selecteer jaar of fase</label>
                                     <button onclick="toggleLegend()" class="text-[9px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg border border-blue-100 hover:bg-blue-100 transition-all font-black uppercase">ℹ️ Legende fasen</button>
                                 </div>
-                                <div id="grade-buttons" class="flex flex-wrap gap-2">
+                                <div id="grade-buttons" class="flex flex-wrap gap-2 text-left">
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- LEGENDE FASEN -->
-                    <div id="legend-container" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 p-5 bg-blue-50/50 rounded-[1.5rem] border border-blue-100 shadow-inner">
-                        <div class="text-[11px] text-slate-600 leading-relaxed text-left">
+                    <div id="legend-container" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 p-5 bg-blue-50/50 rounded-[1.5rem] border border-blue-100 shadow-inner text-left">
+                        <div class="text-[11px] text-slate-600 leading-relaxed">
                             <h4 class="font-black text-blue-600 uppercase mb-1 text-[10px]">P-route (Fase 1-3)</h4>
                             <p><strong>F1:</strong> 0-8 mnd | <strong>F2:</strong> 6-18 mnd | <strong>F3:</strong> 18 mnd-2,5 j.</p>
                         </div>
-                        <div class="text-[11px] text-slate-600 leading-relaxed border-l border-blue-100 pl-6 text-left">
+                        <div class="text-[11px] text-slate-600 leading-relaxed border-l border-blue-100 pl-6">
                             <h4 class="font-black text-slate-800 uppercase mb-1 text-[10px]">S-route (Fase 4-6)</h4>
                             <p><strong>F4:</strong> +2,5 j. | <strong>F5:</strong> +6 j. | <strong>F6:</strong> +10 j.</p>
                         </div>
@@ -83,7 +83,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-100 text-left">
                         <div>
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block italic text-left">3. Zoek op tekst</label>
-                            <input type="text" id="search-input" onkeyup="render()" placeholder="Typ trefwoord..." class="w-full p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 font-semibold text-slate-700 text-[12px]">
+                            <input type="text" id="search-input" onkeyup="render()" placeholder="Typ trefwoord..." class="w-full p-3 bg-slate-50 border-none rounded-xl ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 font-semibold text-slate-700 text-[12px] text-left">
                         </div>
                         <div>
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block italic text-left">Domein</label>
@@ -105,10 +105,10 @@
                 <button id="master-toggle" onclick="toggleAllExamples()" class="w-full md:w-auto text-[9px] font-black text-slate-700 bg-white border border-slate-200 px-6 py-3 rounded-2xl hover:bg-slate-800 hover:text-white transition-all shadow-sm tracking-tighter uppercase font-black">💡 Toon alle voorbeelden</button>
             </div>
 
-            <div id="goals-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-24 text-left"></div>
+            <div id="goals-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-24"></div>
         </div>
 
-        <!-- SELECTION DRAWER (Winkelmandje) -->
+        <!-- SELECTION DRAWER -->
         <div id="selection-drawer" class="fixed bottom-6 right-6 z-[100] flex flex-col items-end">
             <div id="selection-list-box" class="hidden mb-4 w-80 md:w-[380px] bg-white rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[70vh]">
                 <div class="p-6 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800 shadow-md">
@@ -118,7 +118,7 @@
                 <div id="selection-items" class="p-6 overflow-y-auto bg-slate-50 space-y-3 flex-1 scrollbar-hide text-xs italic text-slate-400 text-center">
                     Nog geen doelen toegevoegd.
                 </div>
-                <div class="p-6 bg-white border-t border-slate-100 text-left">
+                <div class="p-6 bg-white border-t border-slate-100">
                     <button id="copy-btn" onclick="exportSelection(event)" class="w-full py-4 bg-blue-600 text-white rounded-[1.2rem] font-black text-[11px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg flex items-center justify-center gap-2">
                         📋 Kopieer voor lesfiche
                     </button>
@@ -152,7 +152,7 @@
         const gradeMapping = {
             "F1.": "Fase 1", "F2.": "Fase 2", "F3.": "Fase 3", "F4.": "Fase 4", "F5.": "Fase 5", "F6.": "Fase 6",
             "JK.": "Jongste Kleuters", "K2.": "2de Kleuterklas", "K3.": "3de Kleuterklas",
-            "J1.": "1ste leerjaar", "J2.": "2de leerjaar", "J3.": "3de leerjaar", "J4.": "4de leerjaar", "J5.": "5de leerjaar", "J6.": "6de leerjaar",
+            "L1.": "1ste leerjaar", "L2.": "2de leerjaar", "L3.": "3de leerjaar", "L4.": "4de leerjaar", "L5.": "5de leerjaar", "L6.": "6de leerjaar",
             "AN": "AN", "Extra": "Extra / Algemeen"
         };
 
@@ -229,7 +229,6 @@
             btnAll.onclick = () => { filterGrade = 'all'; document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btnAll.classList.add('active'); render(); };
             gCont.appendChild(btnAll);
 
-            // Haal unieke codes op en vertaal naar namen
             let rawGrades = [...new Set(dataRows.map(r => (r[colNames.grade] || "").trim()))];
             let mappedGrades = rawGrades.map(g => gradeMapping[g] || g || "Extra / Algemeen");
             let uniqueMapped = [...new Set(mappedGrades)];
@@ -365,10 +364,10 @@
 
         function getTheme(domein) {
             const d = (domein || "").toLowerCase();
-            if (d.includes("computationeel")) return { bg: "bg-indigo-50/70", border: "border-indigo-100", text: "text-indigo-700" };
-            if (d.includes("veiligheid") || d.includes("getallen") || d.includes("taal")) return { bg: "bg-rose-50/70", border: "border-rose-100", text: "text-rose-700" };
-            if (d.includes("mediawijsheid") || d.includes("meten") || d.includes("techniek")) return { bg: "bg-amber-50/70", border: "border-amber-100", text: "text-amber-700" };
-            if (d.includes("creatie") || d.includes("meetkunde") || d.includes("beweging")) return { bg: "bg-emerald-50/70", border: "border-emerald-100", text: "text-emerald-700" };
+            if (d.includes("computationeel") || d.includes("ict")) return { bg: "bg-indigo-50/70", border: "border-indigo-100", text: "text-indigo-700" };
+            if (d.includes("getallen") || d.includes("taal")) return { bg: "bg-rose-50/70", border: "border-rose-100", text: "text-rose-700" };
+            if (d.includes("meten") || d.includes("techniek")) return { bg: "bg-amber-50/70", border: "border-amber-100", text: "text-amber-700" };
+            if (d.includes("meetkunde") || d.includes("beweging")) return { bg: "bg-emerald-50/70", border: "border-emerald-100", text: "text-emerald-700" };
             return { bg: "bg-blue-50/70", border: "border-blue-100", text: "text-blue-700" };
         }
 
