@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Leerplandoelen</title>
+    <title>Leerplandoelen Dashboard</title>
     <!-- Bibliotheken -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -14,31 +14,40 @@
         :root { --brand-color: #2563eb; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; text-align: left; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.4); }
+        .filter-btn { transition: all 0.2s ease; }
         .filter-btn.active { background-color: #1e293b !important; color: white !important; transform: scale(1.05); }
         .goal-card { transition: all 0.3s ease; border: 1.5px solid rgba(226, 232, 240, 0.8); background: white; }
         .goal-card.selected { border-color: #ef4444; background-color: #fef2f2; }
         .section-title { position: relative; padding-left: 1.2rem; cursor: pointer; }
-        .section-title::before { content: ''; position: absolute; left: 0; top: 0.2rem; bottom: 0.2rem; width: 5px; background: #2563eb; border-radius: 4px; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .section-title::before { content: ''; position: absolute; left: 0; top: 0.2rem; bottom: 0.2rem; width: 5px; background: var(--brand-color); border-radius: 4px; }
         
+        .list-row { border-bottom: 1px solid #f1f5f9; transition: all 0.2s; background: white; }
+        .list-row.expanded-row { border-left: 8px solid var(--brand-color); background: white; }
+
+        /* --- STRIKTE PRINT LOGICA --- */
         @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; background: white; }
-            .no-print { display: none !important; }
+            /* Verberg de hele website-interface */
+            body > *:not(#print-section) { display: none !important; }
+            body { background: white !important; padding: 0 !important; margin: 0 !important; }
+            
+            /* Toon enkel de print-sectie */
+            #print-section { display: block !important; visibility: visible !important; width: 100% !important; padding: 40px !important; }
+            .print-item { break-inside: avoid; border-bottom: 1px solid #eee; padding: 20px 0; page-break-inside: avoid; }
         }
-        #print-area { display: none; }
+        
+        #print-section { display: none; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="min-h-screen pb-20 text-slate-800 text-[13px]">
 
-    <!-- Print Sectie -->
-    <div id="print-area" class="p-10 text-left">
-        <div style="border-bottom: 4px solid #000; padding-bottom: 10px; margin-bottom: 30px;">
-            <h1 id="pdf-header-title" style="font-size: 26px; font-weight: 900; text-transform: uppercase;">Lesdoelen</h1>
-            <p id="print-date" style="font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 2px;"></p>
+    <!-- DEZE SECTIE WORDT GEBRUIKT VOOR DE PDF -->
+    <div id="print-section">
+        <div style="border-bottom: 4px solid #000; padding-bottom: 15px; margin-bottom: 30px; text-align: left;">
+            <h1 id="pdf-output-title" style="font-size: 28px; font-weight: 900; text-transform: uppercase; margin: 0; color: #000;">Lesdoelen</h1>
+            <p id="pdf-output-date" style="font-size: 11px; color: #666; margin-top: 5px; font-weight: bold;"></p>
         </div>
-        <div id="print-content-list"></div>
+        <div id="pdf-output-content"></div>
     </div>
 
     <!-- Header -->
@@ -49,16 +58,15 @@
                     <span class="text-white font-black text-2xl italic">L</span>
                 </div>
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-black tracking-tighter uppercase leading-none italic">LEERPLAN<span class="text-blue-500">DOELEN</span></h1>
+                    <h1 class="text-2xl md:text-3xl font-black tracking-tighter uppercase leading-none italic text-left">LEERPLAN<span class="text-blue-500">DOELEN</span></h1>
                     <div class="flex items-center gap-2 mt-1">
                         <span id="active-header-name" class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Welkom</span>
-                        <div id="conn-status" class="w-2.5 h-2.5 rounded-full bg-slate-600 transition-all border-2 border-slate-800"></div>
+                        <div id="conn-status" class="w-2.5 h-2.5 rounded-full bg-slate-600 transition-all border-2 border-slate-800 shadow-sm"></div>
                     </div>
                 </div>
             </div>
             
             <div class="flex items-center gap-4">
-                <!-- SUBTIELERE FEEDBACK BUTTON -->
                 <a href="https://forms.gle/S2eaZMPUGAgS9fNP8" target="_blank" class="border border-white/20 hover:bg-white/10 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-2">
                     <span class="opacity-70 text-xs">🆘</span> Feedback / Support
                 </a>
@@ -74,115 +82,108 @@
     <main class="container mx-auto px-4 no-print text-left">
         
         <!-- WELKOMSPAGINA -->
-        <div id="welcome-screen" class="max-w-4xl mx-auto py-12 animate-fade-in">
+        <div id="welcome-screen" class="max-w-4xl mx-auto py-12 animate-fade-in text-left">
             <div class="glass p-10 md:p-16 rounded-[3rem] shadow-2xl border-white relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-3xl rounded-full -mr-20 -mt-20"></div>
-                
-                <h2 class="text-4xl font-black text-slate-900 tracking-tighter mb-6">Welkom bij het <br><span class="text-blue-600 italic uppercase">Leerplandoelen Dashboard</span></h2>
-                
-                <p class="text-lg text-slate-600 leading-relaxed mb-10 font-medium text-left">
-                    Deze interactieve tool helpt leerkrachten om snel en efficiënt leerplandoelen te raadplegen, te selecteren en te verwerken in hun lesvoorbereidingen.
-                </p>
+                <h2 class="text-4xl font-black text-slate-900 tracking-tighter mb-6 text-left">Welkom bij het <br><span class="text-blue-600 italic uppercase">Leerplandoelen Dashboard</span></h2>
+                <p class="text-lg text-slate-600 leading-relaxed mb-10 font-medium text-left">Deze interactieve tool helpt leerkrachten om snel en efficiënt leerplandoelen te raadplegen, te selecteren en te verwerken in hun lesvoorbereidingen.</p>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                    <div class="space-y-3">
+                    <div class="space-y-3 text-left">
                         <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center font-black">1</div>
-                        <h4 class="font-bold text-slate-900">Kies Discipline</h4>
-                        <p class="text-xs text-slate-500 leading-relaxed text-left">Wissel eenvoudig tussen ICT, Wiskunde, Taal, Wetenschappen en Techniek of Beweging.</p>
+                        <h4 class="font-bold text-slate-900 uppercase text-xs tracking-widest">Kies Discipline</h4>
+                        <p class="text-xs text-slate-500 leading-relaxed">Wissel eenvoudig tussen ICT, Wiskunde, Taal, Wetenschappen en Techniek of Beweging.</p>
                     </div>
-                    <div class="space-y-3">
+                    <div class="space-y-3 text-left">
                         <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center font-black">2</div>
-                        <h4 class="font-bold text-slate-900">Maak je Selectie</h4>
+                        <h4 class="font-bold text-slate-900 uppercase text-xs tracking-widest">Maak je Selectie</h4>
                         <p class="text-xs text-slate-500 leading-relaxed text-left">Filter op jaar of subdomein en voeg doelen toe aan je persoonlijke lesfiche.</p>
                     </div>
-                    <div class="space-y-3">
+                    <div class="space-y-3 text-left">
                         <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center font-black">3</div>
-                        <h4 class="font-bold text-slate-900">Exporteer & Klaar</h4>
-                        <p class="text-xs text-slate-500 leading-relaxed text-left">Kopieer alle doelen naar je klembord of genereer een kant-en-klare PDF.</p>
+                        <h4 class="font-bold text-slate-900 uppercase text-xs tracking-widest">Exporteer & Klaar</h4>
+                        <p class="text-xs text-slate-500 leading-relaxed">Kopieer alle doelen naar je klembord of genereer een kant-en-klare PDF.</p>
                     </div>
                 </div>
 
                 <div class="flex flex-col md:flex-row items-center gap-6 border-t border-slate-100 pt-10">
-                    <button onclick="startApp()" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-blue-200 transition-all hover:scale-105 active:scale-95">
-                        Start met plannen
-                    </button>
-                    <a href="https://forms.gle/S2eaZMPUGAgS9fNP8" target="_blank" class="text-slate-400 hover:text-blue-600 font-bold text-xs uppercase tracking-wider transition-all">
-                        Probleem melden / Helpdesk ↗
-                    </a>
+                    <button onclick="startApp()" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-blue-200 transition-all hover:scale-105 active:scale-95">Start met plannen</button>
+                    <a href="https://forms.gle/S2eaZMPUGAgS9fNP8" target="_blank" class="text-slate-400 hover:text-blue-600 font-bold text-xs uppercase tracking-wider transition-all">Probleem melden / Helpdesk ↗</a>
                 </div>
             </div>
         </div>
 
         <!-- DASHBOARD CONTENT -->
-        <div id="main-content" class="hidden">
-            <!-- Filter Paneel -->
-            <div class="glass rounded-[2.5rem] shadow-xl border border-white mb-10 overflow-hidden text-left">
-                <div onclick="toggleFilterPane()" class="p-5 md:px-10 md:py-6 flex justify-between items-center hover:bg-white/40 transition-all cursor-pointer border-b border-slate-100 text-left">
+        <div id="main-content" class="hidden text-left">
+            <div class="bg-white rounded-[2rem] shadow-xl border border-slate-100 mb-10 overflow-hidden">
+                <div onclick="toggleFilterPane()" class="p-5 md:px-10 md:py-6 flex justify-between items-center hover:bg-slate-50 transition-all cursor-pointer border-b border-slate-100">
                     <h2 class="section-title text-xl md:text-2xl font-black text-slate-900 tracking-tighter uppercase italic text-left">Keuzeopties leerplandoelen</h2>
                     <span id="filter-chevron" class="text-2xl font-bold">−</span>
                 </div>
                 
                 <div id="filter-pane-content" class="px-6 md:px-10 pb-10 pt-6 space-y-8 text-left">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
                         <div class="space-y-3">
-                            <label class="text-[10px] font-black uppercase tracking-widest block ml-1 text-left" style="color: var(--brand-color);">1. Discipline</label>
-                            <select id="discipline-selector" onchange="changeDiscipline(this.value)" class="w-full p-4 bg-white border border-slate-200 rounded-[1.2rem] font-bold text-[16px] shadow-sm focus:ring-4 outline-none transition-all cursor-pointer appearance-none text-left"></select>
+                            <label class="text-[10px] font-black uppercase tracking-widest block ml-1" style="color: var(--brand-color);">1. Discipline</label>
+                            <select id="discipline-selector" onchange="changeDiscipline(this.value)" class="w-full p-4 bg-white border border-slate-200 rounded-[1.2rem] font-bold text-[17px] shadow-sm focus:ring-4 outline-none transition-all cursor-pointer text-blue-700"></select>
                         </div>
-                        <div class="md:col-span-3 space-y-3">
-                            <div class="flex justify-between items-center ml-1 text-left">
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">2. Doelgroep (Onthouden)</label>
-                                <button onclick="toggleLegend()" class="text-[9px] font-bold text-slate-400 hover:text-slate-900 uppercase underline transition-all font-black italic">Legende fasen ℹ️</button>
+                        <div class="md:col-span-3 space-y-3 text-left">
+                            <div class="flex justify-between items-center ml-1">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest uppercase">2. Doelgroep (Onthouden)</label>
+                                <button onclick="toggleLegend()" class="text-[9px] font-bold text-slate-400 hover:text-slate-900 uppercase underline italic font-black">Hulp fasen ℹ️</button>
                             </div>
                             <div id="grade-buttons" class="flex flex-wrap gap-2 text-left"></div>
                         </div>
                     </div>
 
-                    <div id="legend-container" class="hidden p-8 bg-slate-900 rounded-[2rem] text-white shadow-2xl text-left italic">
+                    <div id="legend-container" class="hidden p-8 bg-slate-900 rounded-[2rem] text-white shadow-2xl italic text-left">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 italic">
-                            <div><h4 class="font-black text-blue-400 uppercase text-[10px] mb-2 font-bold font-black">P-route</h4><p class="text-slate-300">F1: 0-8m | F2: 6-18m | F3: 18m-2,5j</p></div>
-                            <div class="border-l border-slate-700 pl-8 text-left"><h4 class="font-black text-blue-400 uppercase text-[10px] mb-2 font-bold font-black">S-route</h4><p class="text-slate-300">F4: +2,5j | F5: +6j | F6: +10j</p></div>
+                            <div><h4 class="font-black text-blue-400 uppercase text-[10px] mb-2 font-black">P-route</h4><p class="text-slate-300">F1: 0-8m | F2: 6-18m | F3: 18m-2,5j</p></div>
+                            <div class="border-l border-slate-700 pl-8 text-left"><h4 class="font-black text-blue-400 uppercase text-[10px] mb-2 font-black">S-route</h4><p class="text-slate-300">F4: +2,5j | F5: +6j | F6: +10j</p></div>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-8 border-t border-slate-100 text-left">
-                        <input type="text" id="search-input" onkeyup="render()" placeholder="🔍 Snel zoeken..." class="w-full p-4 bg-white border border-slate-200 rounded-2xl font-semibold shadow-sm focus:ring-4 outline-none transition-all text-[15px]">
-                        <select id="domain-select" onchange="handleDomainChange()" class="p-4 bg-white border border-slate-200 rounded-2xl font-bold shadow-sm outline-none cursor-pointer text-[15px]"></select>
-                        <select id="subdomain-select" onchange="handleSubdomainChange()" class="p-4 bg-white border border-slate-200 rounded-2xl font-bold shadow-sm outline-none cursor-pointer text-[15px]"></select>
-                        <select id="cluster-select" onchange="render()" class="p-4 bg-white border border-slate-200 rounded-2xl font-bold shadow-sm outline-none cursor-pointer text-[15px]"></select>
+                        <input type="text" id="search-input" onkeyup="render()" placeholder="🔍 Zoek tekst..." class="w-full p-4 bg-white border border-slate-200 rounded-2xl font-semibold shadow-sm focus:ring-4 outline-none text-[17px]">
+                        <select id="domain-select" onchange="handleDomainChange()" class="p-4 bg-white border border-slate-200 rounded-2xl font-bold shadow-sm outline-none text-[17px] cursor-pointer"></select>
+                        <select id="subdomain-select" onchange="handleSubdomainChange()" class="p-4 bg-white border border-slate-200 rounded-2xl font-bold shadow-sm outline-none text-[17px] cursor-pointer"></select>
+                        <select id="cluster-select" onchange="render()" class="p-4 bg-white border border-slate-200 rounded-2xl font-bold shadow-sm outline-none text-[17px] cursor-pointer"></select>
                     </div>
                 </div>
             </div>
 
-            <div id="result-count" class="mb-6 px-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] italic text-left">0 DOELEN GEVONDEN</div>
+            <div id="result-count" class="mb-6 px-4 text-[11px] font-black text-slate-400 uppercase tracking-widest italic text-left">0 DOELEN GEVONDEN</div>
             <div id="goals-grid" class="pb-32 text-left"></div>
         </div>
 
-        <!-- Floating Selection (Mandje) -->
+        <!-- Floating Basket -->
         <div id="selection-drawer" class="fixed bottom-8 right-8 z-[100] no-print text-left">
             <div id="selection-list-box" class="hidden mb-6 w-80 md:w-[450px] bg-white rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.25)] border border-slate-200 overflow-hidden flex flex-col max-h-[75vh]">
                 <div class="p-8 bg-slate-900 text-white flex justify-between items-center shadow-lg">
-                    <div><h3 class="font-black text-sm uppercase tracking-widest italic text-blue-400">Mijn Lesdoelen</h3><p class="text-[9px] text-slate-400 font-bold uppercase mt-1 italic font-mono">Planner</p></div>
-                    <button onclick="clearSelection()" class="text-[10px] underline opacity-50 hover:opacity-100 font-black uppercase">Wis alles</button>
+                    <div><h3 class="font-black text-sm uppercase tracking-widest italic text-blue-400 text-left">Mijn Lesdoelen</h3><p class="text-[9px] text-slate-400 font-bold uppercase mt-1 italic">Planning</p></div>
+                    <button onclick="clearSelection()" class="text-[10px] underline opacity-50 hover:opacity-100 font-black uppercase tracking-tighter">Wis alles</button>
                 </div>
-                <div id="selection-items" class="p-8 overflow-y-auto bg-slate-50 space-y-4 flex-1 scrollbar-hide text-left"></div>
+                <div id="selection-items" class="p-8 overflow-y-auto bg-slate-50 space-y-4 flex-1 scrollbar-hide text-left italic">
+                    Nog geen doelen gekozen.
+                </div>
                 <div class="p-8 bg-white border-t border-slate-100 flex flex-col gap-3">
-                    <div class="space-y-1 mb-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Titel op PDF:</label>
+                    <div class="space-y-1 mb-2 text-left">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 text-left">PDF Titel:</label>
                         <input type="text" id="pdf-title-input" value="Lesdoelen" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
-                    <button onclick="exportSelection()" class="w-full py-5 bg-blue-600 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl">📋 KOPIËREN</button>
-                    <button onclick="printSelection()" class="w-full py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center justify-center gap-3 italic">🖨️ Afdrukken / PDF</button>
+                    <button id="copy-btn" onclick="exportSelection()" class="w-full py-5 bg-blue-600 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl">📋 KOPIËREN VOOR KLEMBORD</button>
+                    <button onclick="printSelection()" class="w-full py-4 bg-slate-800 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all text-center italic uppercase">🖨️ PDF / AFDRUKKEN</button>
                 </div>
             </div>
             <button onclick="toggleSelectionDrawer()" class="group p-6 bg-blue-600 text-white rounded-[2.5rem] shadow-2xl hover:scale-110 active:scale-95 transition-all flex items-center gap-5 ring-8 ring-white relative">
-                <span class="text-3xl font-black italic">📋</span><span id="selection-counter" class="font-black text-2xl leading-none">0</span>
+                <span class="text-3xl">📋</span><span id="selection-counter" class="font-black text-2xl leading-none">0</span>
             </button>
         </div>
 
         <!-- Loader -->
         <div id="loading-screen" class="flex flex-col items-center justify-center py-48 text-center no-print text-left">
-            <div class="w-24 h-24 border-[12px] border-slate-200 border-t-blue-600 rounded-full animate-spin mb-8 shadow-inner"></div>
-            <p id="loading-text" class="text-slate-400 font-black uppercase tracking-[0.4em] text-[10px] animate-pulse italic">Synchroniseren...</p>
+            <div class="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4 shadow-sm"></div>
+            <p id="loading-text" class="text-slate-400 font-bold uppercase tracking-widest text-[10px] animate-pulse italic">Synchroniseren...</p>
         </div>
     </main>
 
@@ -192,7 +193,7 @@
             { name: "ICT", gid: "1392774175", color: "#2563eb", icon: "🧠" },
             { name: "Wiskunde", gid: "795366275", color: "#e11d48", icon: "🔢" },
             { name: "Taal en Communicatie", gid: "1465352920", color: "#059669", icon: "🗣️" },
-            { name: "Wetenschap en Techniek", gid: "2053307938", color: "#d97706", icon: "🔬" },
+            { name: "Wetenschap en Techniek", gid: "2053307938" , color: "#d97706", icon: "🔬" },
             { name: "Bewegingsopvoeding", gid: "1884684693", color: "#7c3aed", icon: "🏃" }
         ];
 
@@ -206,7 +207,7 @@
         let activeDisciplineName = localStorage.getItem('preferredDiscipline') || DISCIPLINES[0].name;
 
         async function init() {
-            const fetchPromises = DISCIPLINES.map(async (disc) => {
+            const promises = DISCIPLINES.map(async (disc) => {
                 try {
                     const response = await fetch(BASE_URL + disc.gid);
                     const csv = await response.text();
@@ -223,18 +224,22 @@
                                 else if (l.includes('voorbeeld')) cols.example = h;
                                 else if (l.includes('woordenschat')) cols.vocab = h;
                                 else if (l.includes('domein')) cols.domain = h;
-                                else if (l.includes('soort')) cols.type = h;
                             });
                             dataCache[disc.name] = { rows: results.data, cols: cols };
                             resolve();
                         }});
                     });
-                } catch (e) { console.error(e); }
+                } catch (e) { console.error(e); resolve(); }
             });
-            await Promise.all(fetchPromises);
-            fillDisciplineSelector();
-            updateSelectionUI();
+            await Promise.all(promises);
+            finalizeLoad();
+        }
+
+        function finalizeLoad() {
+            const sel = document.getElementById('discipline-selector');
+            if(sel) sel.innerHTML = DISCIPLINES.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
             document.getElementById('loading-screen').classList.add('hidden');
+            updateSelectionUI();
             updateStatusBadge('live');
         }
 
@@ -246,189 +251,178 @@
         }
 
         function showDiscipline(name) {
-            if(!dataCache[name]) return;
+            if(!dataCache[name]) name = DISCIPLINES[0].name;
             activeDisciplineName = name;
             localStorage.setItem('preferredDiscipline', name);
             const disc = DISCIPLINES.find(d => d.name === name);
             document.documentElement.style.setProperty('--brand-color', disc.color);
             document.getElementById('active-header-name').innerText = name;
             document.getElementById('discipline-selector').value = name;
-            setupFilters(dataCache[name]);
+            setupGradeButtons(dataCache[name]);
         }
 
-        function setupFilters(data) {
+        function setupGradeButtons(data) {
             const gCont = document.getElementById('grade-buttons');
             if(!gCont) return;
             gCont.innerHTML = '';
             const btnAll = document.createElement('button');
-            btnAll.className = `filter-btn ${filterGrade === 'all' ? 'active' : ''} px-6 py-3 rounded-2xl border border-slate-200 text-sm font-bold uppercase shadow-sm bg-white`;
+            btnAll.className = `filter-btn ${filterGrade === 'all' ? 'active' : ''} px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-black uppercase shadow-sm bg-white`;
             btnAll.innerText = "Alles";
             btnAll.onclick = () => setGrade('all', btnAll);
             gCont.appendChild(btnAll);
 
-            let rawGrades = [...new Set(data.rows.map(r => (r[data.cols.grade] || "").trim()))];
-            let mapped = [...new Set(rawGrades.map(g => gradeMapping[g] || g || "Extra / Algemeen"))];
-            mapped.sort((a, b) => (gradeOrder.indexOf(a) === -1 ? 998 : gradeOrder.indexOf(a)) - (gradeOrder.indexOf(b) === -1 ? 998 : gradeOrder.indexOf(b)));
+            let grades = [...new Set(data.rows.map(r => (r[data.cols.grade] || "").trim()))].map(g => gradeMapping[g] || g || "Extra / Algemeen");
+            let uniqueMapped = [...new Set(grades)].sort((a,b) => (gradeOrder.indexOf(a) === -1 ? 999 : gradeOrder.indexOf(a)) - (gradeOrder.indexOf(b) === -1 ? 999 : gradeOrder.indexOf(b)));
             
-            mapped.forEach(g => {
+            uniqueMapped.forEach(g => {
                 const btn = document.createElement('button');
                 btn.className = `filter-btn ${filterGrade === g ? 'active' : ''} px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-bold shadow-sm bg-white uppercase`;
                 btn.innerText = g;
                 btn.onclick = () => setGrade(g, btn);
                 gCont.appendChild(btn);
             });
-
             fillDropdown('domain-select', data.cols.domain, 'Alle Domeinen', data.rows);
-            handleDomainChange(); 
+            handleDomainChange();
+        }
+
+        function handleDomainChange() {
+            const d = dataCache[activeDisciplineName];
+            const v = document.getElementById('domain-select').value;
+            let rows = v === 'all' ? d.rows : d.rows.filter(r => r[d.cols.domain] === v);
+            fillDropdown('subdomain-select', d.cols.sub, 'Alle Subdomeinen', rows);
+            document.getElementById('subdomain-select').value = 'all';
+            handleSubdomainChange();
+        }
+
+        function handleSubdomainChange() {
+            const d = dataCache[activeDisciplineName];
+            const dv = document.getElementById('domain-select').value;
+            const sv = document.getElementById('subdomain-select').value;
+            let rows = d.rows;
+            if (dv !== 'all') rows = rows.filter(r => r[d.cols.domain] === dv);
+            if (sv !== 'all') rows = rows.filter(r => r[d.cols.sub] === sv);
+            fillDropdown('cluster-select', d.cols.cluster, 'Alle Clusters', rows);
+            document.getElementById('cluster-select').value = 'all';
+            render();
+        }
+
+        function fillDropdown(id, key, defaultText, rows) {
+            const el = document.getElementById(id);
+            if (!el || !key) return;
+            const items = [...new Set(rows.map(r => r[key]))].filter(Boolean).sort();
+            el.innerHTML = `<option value="all">${defaultText}</option>` + items.map(i => `<option value="${i}">${i}</option>`).join('');
         }
 
         function render() {
             const data = dataCache[activeDisciplineName];
-            if(!data) return;
-            const q = document.getElementById('search-input').value.toLowerCase();
-            const domF = document.getElementById('domain-select').value;
-            const subdomF = document.getElementById('subdomain-select').value;
-            const clusterF = document.getElementById('cluster-select').value;
             const grid = document.getElementById('goals-grid');
-            
+            const q = document.getElementById('search-input')?.value?.toLowerCase() || "";
+            const domF = document.getElementById('domain-select')?.value || 'all';
+            const subdomF = document.getElementById('subdomain-select')?.value || 'all';
+            const clusterF = document.getElementById('cluster-select')?.value || 'all';
+
             const filtered = data.rows.filter(r => {
-                const mappedGrade = gradeMapping[(r[data.cols.grade] || "").trim()] || (r[data.cols.grade] || "").trim() || "Extra / Algemeen";
-                return (filterGrade === 'all' || mappedGrade === filterGrade) && (domF === 'all' || r[data.cols.domain] === domF) && (subdomF === 'all' || r[data.cols.sub] === subdomF) && (clusterF === 'all' || r[data.cols.cluster] === clusterF) &&
-                       ((r[data.cols.goal] || "").toLowerCase().includes(q) || (r[data.cols.sub] || "").toLowerCase().includes(q));
+                const mappedGrade = gradeMapping[(r[data.cols.grade] || "").trim()] || r[data.cols.grade] || "Extra / Algemeen";
+                const matchesSearch = ((r[data.cols.goal] || "").toLowerCase().includes(q) || (r[data.cols.sub] || "").toLowerCase().includes(q));
+                return (filterGrade === 'all' || mappedGrade === filterGrade) && (domF === 'all' || r[data.cols.domain] === domF) && (subdomF === 'all' || r[data.cols.sub] === subdomF) && (clusterF === 'all' || r[data.cols.cluster] === clusterF) && matchesSearch;
             });
 
             document.getElementById('result-count').innerText = `${filtered.length} DOELEN GEVONDEN`;
-            
-            if (viewMode === 'list') {
-                grid.className = "flex flex-col glass rounded-3xl overflow-hidden shadow-lg border border-slate-200";
-                grid.innerHTML = filtered.map((r, idx) => {
-                    const rawIdx = data.rows.indexOf(r);
-                    const isSelected = selectedGoals.some(g => (g.code + g.goal) === (r[data.cols.code] + r[data.cols.goal]));
-                    return `
-                    <div id="list-row-${idx}" class="list-row group flex flex-col border-b border-slate-100 last:border-0 ${isSelected ? 'border-l-8 border-blue-500 bg-blue-50/20' : ''}">
+            grid.className = viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-24" : "flex flex-col glass rounded-3xl overflow-hidden shadow-lg border border-slate-200";
+
+            grid.innerHTML = filtered.map((r, idx) => {
+                const isSelected = selectedGoals.some(g => (g.code + g.goal) === (r[data.cols.code] + r[data.cols.goal]));
+                const mappedGrade = gradeMapping[(r[data.cols.grade] || "").trim()] || r[data.cols.grade] || 'Algemeen';
+                const theme = getTheme(r[data.cols.domain]);
+                const rawIdx = data.rows.indexOf(r);
+
+                if (viewMode === 'list') {
+                    return `<div class="list-row group flex flex-col ${isSelected ? 'border-l-8 border-l-red-500 bg-red-50/10' : ''}">
                         <div class="flex items-center p-5 cursor-pointer text-left" onclick="toggleListRow(${idx})">
-                            <div class="w-24 font-black text-blue-600 text-[10px]">#${r[data.cols.code] || ''}</div>
-                            <div class="flex-1 text-left">
-                                <div class="font-black text-slate-900 uppercase tracking-tighter text-[13px] mb-1 text-left">${r[data.cols.sub]}</div>
-                                <div class="text-slate-500 font-bold text-[13px] line-clamp-1 opacity-80 text-left italic">${r[data.cols.goal]}</div>
-                            </div>
-                            <div class="w-32 text-[10px] font-bold text-slate-400 uppercase italic pr-6 text-right">${gradeMapping[(r[data.cols.grade] || "").trim()] || 'Algemeen'}</div>
-                            <button onclick="event.stopPropagation(); toggleGoalSelection('${activeDisciplineName}', ${data.rows.indexOf(r)}, this)" 
-                                    class="w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-lg ring-2 ring-white transition-all ${isSelected ? 'bg-red-500' : 'bg-blue-600'}">
-                                <span class="text-xl font-bold">${isSelected ? '−' : '＋'}</span>
-                            </button>
+                            <div class="w-20 font-black text-blue-600 text-[10px]">#${r[data.cols.code] || ''}</div>
+                            <div class="flex-1 text-left"><div class="font-black text-slate-900 uppercase text-[13px]">${r[data.cols.sub]}</div><div class="text-slate-500 font-bold text-[12px] line-clamp-1 opacity-70">${r[data.cols.goal]}</div></div>
+                            <div class="w-32 text-[10px] font-bold text-slate-400 uppercase italic pr-6 text-right">${mappedGrade}</div>
+                            <button onclick="event.stopPropagation(); toggleGoalSelection('${activeDisciplineName}', ${rawIdx}, this)" class="w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-lg ring-2 ring-white transition-all ${isSelected ? 'bg-red-500' : 'bg-blue-600'}">${isSelected ? '−' : '＋'}</button>
                         </div>
-                        <div id="list-detail-${idx}" class="hidden p-8 bg-slate-50/50 border-t border-slate-100 text-left">
-                            <p class="text-[17px] leading-relaxed font-black text-slate-800 mb-4 italic text-left uppercase">${r[data.cols.goal]}</p>
-                            ${r[data.cols.vocab] ? `<p class="text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest font-mono text-left">🏷️ ${r[data.cols.vocab]}</p>` : ''}
-                            ${r[data.cols.example] ? `<div class="p-6 bg-white rounded-2xl border border-slate-200 text-slate-500 text-[13px] font-medium leading-relaxed italic shadow-inner">💡 ${r[data.cols.example]}</div>` : ''}
+                        <div id="list-detail-${idx}" class="hidden p-8 bg-slate-50/50 border-t text-left italic">
+                            <p class="text-[17px] font-black text-slate-800 mb-4">${r[data.cols.goal]}</p>
+                            ${r[data.cols.vocab] ? `<p class="text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest font-mono">🏷️ ${r[data.cols.vocab]}</p>` : ''}
+                            ${r[data.cols.example] ? `<div class="p-6 bg-white rounded-2xl border text-slate-500 text-[13px] font-medium leading-relaxed shadow-inner">💡 ${r[data.cols.example]}</div>` : ''}
                         </div>
                     </div>`;
-                }).join('');
-            } else {
-                grid.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-24 text-left";
-                grid.innerHTML = filtered.map((r, idx) => {
-                    const rawIdx = data.rows.indexOf(r);
-                    const isSelected = selectedGoals.some(g => (g.code + g.goal) === (r[data.cols.code] + r[data.cols.goal]));
-                    const domStyle = getTheme(r[data.cols.domain]);
-                    return `
-                    <div class="goal-card glass p-8 rounded-[3rem] flex flex-col shadow-sm border-2 text-left ${isSelected ? 'ring-4 ring-red-500/20 border-red-500 bg-red-50/10' : ''}">
-                        <div class="flex justify-between items-start mb-6 text-left">
-                            <div class="flex flex-col gap-1 text-left">
-                                <div class="flex gap-2 text-left"><span class="px-3 py-1 rounded-full font-black uppercase bg-white ${domStyle.text} border border-slate-100 shadow-sm text-[8px]">${r[data.cols.domain] || 'ALGEMEEN'}</span></div>
-                                <span class="font-bold text-slate-400 ml-1 tracking-wider uppercase italic text-[10px] text-left text-blue-700">${gradeMapping[(r[data.cols.grade] || "").trim()] || 'Algemeen'}</span>
-                            </div>
+                } else {
+                    return `<div class="goal-card glass p-8 rounded-[3rem] flex flex-col shadow-sm border-2 text-left ${isSelected ? 'ring-4 ring-red-500/20 border-red-500 bg-red-50/10' : ''}">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="flex flex-col gap-1 text-left"><div class="flex gap-2 text-left"><span class="px-3 py-1 rounded-full font-black uppercase bg-white ${theme.text} border border-slate-100 shadow-sm text-[8px]">${r[data.cols.domain] || 'ALGEMEEN'}</span></div><span class="font-bold text-slate-400 ml-1 tracking-wider uppercase italic text-[10px] text-blue-700">${mappedGrade}</span></div>
                             <div class="bg-slate-900/5 px-3 py-1 rounded-xl border border-white shadow-sm font-black text-sm text-right">#${r[data.cols.code] || ''}</div>
                         </div>
                         <h3 class="text-slate-900 font-extrabold text-[15px] leading-snug mb-4 uppercase tracking-tighter text-left">${r[data.cols.sub] || ''}</h3>
                         <div class="text-slate-700 text-[13px] leading-relaxed font-semibold bg-white/70 p-6 rounded-[2rem] border border-white/50 shadow-inner mb-4 flex-1 text-left">${r[data.cols.goal] || ''}</div>
                         <div class="mt-auto space-y-3">
-                            <button onclick="toggleGoalSelection('${activeDisciplineName}', ${data.rows.indexOf(r)}, this)" 
-                                    class="w-full py-4 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg ${isSelected ? 'bg-red-500 shadow-red-200' : 'bg-blue-600 shadow-blue-200'}">
-                                ${isSelected ? '− Verwijderen uit lesfiche' : '＋ Toevoegen aan lesfiche'}
-                            </button>
-                            ${r[data.cols.example] ? `
-                                <div id="ex-${idx}" class="hidden bg-white/60 p-5 rounded-2xl border border-white shadow-sm mb-2 text-slate-600 italic text-[12px] text-left">"${r[data.cols.example]}"</div>
-                                <button id="btn-ex-${idx}" onclick="toggleExample(${idx})" class="w-full py-3 rounded-2xl bg-slate-100 text-slate-400 text-[9px] font-black uppercase hover:bg-white border border-white/50 transition-all text-center">Praktijkvoorbeeld 💡</button>
-                            ` : ''}
+                            <button onclick="toggleGoalSelection('${activeDisciplineName}', ${rawIdx}, this)" class="w-full py-4 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg ${isSelected ? 'bg-red-500' : 'bg-blue-600'}">${isSelected ? '− Verwijderen' : '＋ Toevoegen'}</button>
+                            ${r[data.cols.example] ? `<button onclick="toggleExample(${idx})" id="btn-ex-${idx}" class="w-full py-3 rounded-2xl bg-slate-100 text-slate-400 text-[9px] font-black uppercase hover:bg-white border border-white/50 transition-all">Voorbeeld 💡</button><div id="ex-${idx}" class="hidden bg-white/60 p-5 rounded-2xl border border-white shadow-sm mt-2 text-slate-600 italic text-[12px]">"${r[data.cols.example]}"</div>` : ''}
                         </div>
                     </div>`;
-                }).join('');
-            }
+                }
+            }).join('');
         }
 
-        // --- ACTIES ---
-        function toggleGoalSelection(disc, idx, btn) {
+        // --- UPDATED SELECTION TOGGLE ---
+        function toggleGoalSelection(disc, rowIdx, btn) {
             const data = dataCache[disc];
-            const item = data.rows[idx];
+            const item = data.rows[rowIdx];
             const goalId = (item[data.cols.code] || '') + item[data.cols.goal];
-            const existingIdx = selectedGoals.findIndex(g => (g.code + g.goal) === goalId);
-
-            if (existingIdx > -1) {
-                selectedGoals.splice(existingIdx, 1);
-            } else {
+            const idx = selectedGoals.findIndex(g => (g.code + g.goal) === goalId);
+            if (idx > -1) { selectedGoals.splice(idx, 1); }
+            else { 
                 selectedGoals.push({ disc, code: item[data.cols.code], sub: item[data.cols.sub], goal: item[data.cols.goal], grade: gradeMapping[(item[data.cols.grade] || "").trim()] || 'Algemeen' });
-                confetti({ particleCount: 150, spread: 80, origin: { y: 0.8 }, colors: [DISCIPLINES.find(d => d.name === disc).color, '#ffffff'] });
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.8 }, colors: [DISCIPLINES.find(d => d.name === disc).color, '#ffffff'] });
             }
-            
             localStorage.setItem('mySelectedGoals', JSON.stringify(selectedGoals));
-            updateSelectionUI();
-            render();
+            updateSelectionUI(); render();
         }
 
+        // --- PRINT FUNCTIE (DE FIX) ---
         function printSelection() {
-            const area = document.getElementById('print-content-list');
+            const area = document.getElementById('pdf-output-content');
             const customTitle = document.getElementById('pdf-title-input').value || "Mijn Lesdoelen";
             if (selectedGoals.length === 0) return alert("Je mandje is leeg!");
             
-            document.getElementById('pdf-title-output').innerText = customTitle;
-            document.getElementById('print-date').innerText = "Vervaardigd op: " + new Date().toLocaleDateString('nl-BE');
+            document.getElementById('pdf-output-title').innerText = customTitle;
+            document.getElementById('pdf-output-date').innerText = "Aangemaakt op: " + new Date().toLocaleDateString('nl-BE');
             
             area.innerHTML = selectedGoals.map(g => `
-                <div style="border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; text-align: left;">
-                    <div style="font-size: 10px; font-weight: 800; color: #888; text-transform: uppercase;">${g.disc} • ${g.grade} • #${g.code}</div>
-                    <h2 style="font-size: 18px; font-weight: 900; margin: 8px 0; text-transform: uppercase;">${g.sub}</h2>
-                    <p style="font-size: 15px; line-height: 1.6; color: #222; font-weight: 600;">${g.goal}</p>
+                <div class="print-item">
+                    <div style="font-size: 10px; font-weight: 800; color: #888; text-transform: uppercase;">${g.disc} &bull; ${g.grade} &bull; #${g.code}</div>
+                    <h2 style="font-size: 16px; font-weight: 900; margin: 8px 0; text-transform: uppercase;">${g.sub}</h2>
+                    <p style="font-size: 14px; line-height: 1.6; color: #000; font-weight: 600;">${g.goal}</p>
                 </div>`).join('');
             
-            setTimeout(() => { window.print(); }, 500);
-        }
-
-        function exportSelection() {
-            if (selectedGoals.length === 0) return;
-            const text = selectedGoals.map(g => `[${g.disc}] [${g.grade}] ${g.code}: ${g.sub}\nDOEL: ${g.goal}`).join('\n---\n');
-            navigator.clipboard.writeText(text).then(() => { alert("Gekopieerd naar klembord!"); });
+            setTimeout(() => { window.print(); }, 400);
         }
 
         function updateSelectionUI() {
             document.getElementById('selection-counter').innerText = selectedGoals.length;
             const container = document.getElementById('selection-items');
+            if (!container) return;
             if (selectedGoals.length === 0) { container.innerHTML = `<p class="italic text-center py-10 opacity-40">Nog niets gekozen.</p>`; return; }
-            container.innerHTML = selectedGoals.map((g, i) => `
-                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm relative text-left mb-3">
-                    <button onclick="removeFromBasket(${i})" class="absolute top-4 right-4 text-red-500 font-bold">✕</button>
-                    <div class="text-[9px] font-black text-blue-600 uppercase mb-1">#${g.code} | ${g.disc}</div>
-                    <div class="font-extrabold text-slate-800 uppercase tracking-tighter text-[11px] mb-2 leading-tight">${g.sub}</div>
-                    <div class="text-[10px] text-slate-500 border-t pt-2">${g.goal}</div>
-                </div>`).join('');
+            container.innerHTML = selectedGoals.map((g, i) => `<div class="bg-white p-5 rounded-3xl border shadow-sm relative text-left mb-3"><button onclick="removeFromBasket(${i})" class="absolute top-4 right-4 text-red-400 hover:text-red-600 font-bold">✕</button><div class="text-[9px] font-black text-blue-600 uppercase mb-1">#${g.code} | ${g.disc}</div><div class="font-extrabold text-slate-800 uppercase tracking-tighter text-[11px] mb-2 leading-tight italic">${g.sub}</div><div class="text-[10px] text-slate-500 border-t pt-2">${g.goal}</div></div>`).join('');
         }
 
+        // --- BASIC HELPERS ---
         function removeFromBasket(i) { selectedGoals.splice(i, 1); localStorage.setItem('mySelectedGoals', JSON.stringify(selectedGoals)); updateSelectionUI(); render(); }
-        function clearSelection() { if(confirm("Mandje legen?")) { selectedGoals = []; localStorage.removeItem('mySelectedGoals'); updateSelectionUI(); render(); } }
-        function setGrade(g, btn) { filterGrade = g; localStorage.setItem('preferredGrade', g); document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(); }
-        function handleDomainChange() { const d = dataCache[activeDisciplineName]; const v = document.getElementById('domain-select').value; let rows = v === 'all' ? d.rows : d.rows.filter(r => r[d.cols.domain] === v); fillDropdown('subdomain-select', d.cols.sub, 'Alle Subdomeinen', rows); document.getElementById('subdomain-select').value = 'all'; handleSubdomainChange(); }
-        function handleSubdomainChange() { const d = dataCache[activeDisciplineName]; const dv = document.getElementById('domain-select').value; const sv = document.getElementById('subdomain-select').value; let rows = d.rows; if (dv !== 'all') rows = rows.filter(r => r[d.cols.domain] === dv); if (sv !== 'all') rows = rows.filter(r => r[d.cols.sub] === sv); fillDropdown('cluster-select', d.cols.cluster, 'Alle Clusters', rows); document.getElementById('cluster-select').value = 'all'; render(); }
-        function setView(m) { viewMode = m; localStorage.setItem('preferredView', m); document.getElementById('grid-view-btn').className = m === 'grid' ? "p-2 px-5 rounded-xl text-[10px] font-black uppercase transition-all bg-white/10 text-white shadow-inner" : "p-2 px-5 rounded-xl text-[10px] font-black uppercase text-slate-400"; document.getElementById('list-view-btn').className = m === 'list' ? "p-2 px-5 rounded-xl text-[10px] font-black uppercase bg-white/10 text-white shadow-inner" : "p-2 px-5 rounded-xl text-[10px] font-black uppercase text-slate-400"; render(); }
-        function toggleListRow(i) { document.getElementById(`list-detail-${i}`).classList.toggle('hidden'); }
-        function toggleExample(id) { const el = document.getElementById(`ex-${id}`); el.classList.toggle('hidden'); document.getElementById(`btn-ex-${id}`).innerText = el.classList.contains('hidden') ? "Praktijkvoorbeeld 💡" : "Dichtklappen 🔼"; }
-        function fillDropdown(id, k, t, r) { const e = document.getElementById(id); if(!e || !k) return; const items = [...new Set(r.map(x => x[k]))].filter(Boolean).sort(); e.innerHTML = `<option value="all">${t}</option>` + items.map(i => `<option value="${i}">${i}</option>`).join(''); }
-        function fillDisciplineSelector() { document.getElementById('discipline-selector').innerHTML = DISCIPLINES.map(d => `<option value="${d.name}">${d.name}</option>`).join(''); }
+        function clearSelection() { if(confirm("Lijst wissen?")) { selectedGoals = []; localStorage.removeItem('mySelectedGoals'); updateSelectionUI(); render(); } }
+        function setGrade(g, btn) { filterGrade = g; localStorage.setItem('preferredGrade', g); document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); if(btn) btn.classList.add('active'); render(); }
         function changeDiscipline(n) { showDiscipline(n); }
-        function updateStatusBadge(s) { const e = document.getElementById('conn-status'); if(e) e.style.backgroundColor = s === 'live' ? '#10b981' : '#64748b'; }
-        function getTheme(domein) { const d = (domein || "").toLowerCase(); if (d.includes("computationeel") || d.includes("ict")) return { text: "text-indigo-700" }; if (d.includes("getallen") || d.includes("taal")) return { text: "text-rose-700" }; if (d.includes("meten") || d.includes("techniek")) return { text: "text-amber-700" }; return { text: "text-blue-700" }; }
         function toggleFilterPane() { document.getElementById('filter-pane-content').classList.toggle('hidden'); document.getElementById('filter-chevron').innerText = document.getElementById('filter-pane-content').classList.contains('hidden') ? "+" : "−"; }
         function toggleLegend() { document.getElementById('legend-container').classList.toggle('hidden'); }
         function toggleSelectionDrawer() { document.getElementById('selection-list-box').classList.toggle('hidden'); }
+        function toggleListRow(i) { document.getElementById(`list-detail-${i}`).classList.toggle('hidden'); }
+        function toggleExample(i) { const el = document.getElementById(`ex-${i}`); el.classList.toggle('hidden'); document.getElementById(`btn-ex-${i}`).innerText = el.classList.contains('hidden') ? "Voorbeeld 💡" : "Dichtklappen 🔼"; }
+        function setView(m) { viewMode = m; localStorage.setItem('preferredView', m); document.getElementById('grid-view-btn').className = m === 'grid' ? "p-2 px-5 rounded-xl text-[10px] font-black uppercase transition-all bg-white/10 text-white shadow-inner" : "p-2 px-5 rounded-xl text-[10px] font-black uppercase text-slate-400"; document.getElementById('list-view-btn').className = m === 'list' ? "p-2 px-5 rounded-xl text-[10px] font-black uppercase bg-white/10 text-white shadow-inner" : "p-2 px-5 rounded-xl text-[10px] font-black uppercase text-slate-400"; render(); }
+        function updateStatusBadge(s) { const e = document.getElementById('conn-status'); if(e) e.style.backgroundColor = s === 'live' ? '#10b981' : '#64748b'; }
+        function getTheme(dom) { const d = (dom || "").toLowerCase(); if (d.includes("computationeel") || d.includes("ict")) return { text: "text-indigo-700" }; if (d.includes("getallen") || d.includes("taal")) return { text: "text-rose-700" }; if (d.includes("meten") || d.includes("techniek")) return { text: "text-amber-700" }; return { text: "text-blue-700" }; }
+        function exportSelection() { const text = selectedGoals.map(g => `[${g.disc}] [${g.grade}] ${g.code}: ${g.sub}\nDOEL: ${g.goal}`).join('\n---\n'); navigator.clipboard.writeText(text).then(() => alert("Gekopieerd naar klembord!")); }
 
         window.onload = init;
     </script>
